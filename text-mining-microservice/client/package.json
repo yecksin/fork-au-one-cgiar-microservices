@@ -5,10 +5,13 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build-dev": "ng build --configuration development",
     "watch": "ng build --watch --configuration development",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "lint": "ng lint",
+    "s-lint": "stylelint '**/*.scss'",
     "serve:ssr:client": "node dist/client/server/server.mjs",
     "docker:build": "docker build -t text_mining_frontend .",
     "docker:run": "docker run --env-file ./.env -dti --name text_mining_frontend_dev -p 4200:4200 text_mining_frontend",
@@ -44,7 +47,12 @@
     "@angular/compiler-cli": "^17.1.0",
     "@types/express": "^4.17.17",
     "@types/node": "^18.18.0",
-    "typescript": "~5.3.2"
+    "angular-eslint": "^18.0.1",
+    "eslint": "^8.57.0",
+    "stylelint": "^16.6.1",
+    "stylelint-config-standard-scss": "^13.1.0",
+    "typescript": "~5.3.2",
+    "typescript-eslint": "^7.11.0"
   },
   "jest": {
     "preset": "jest-preset-angular",
