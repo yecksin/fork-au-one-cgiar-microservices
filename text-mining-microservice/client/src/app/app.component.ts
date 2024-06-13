@@ -8,19 +8,20 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { ToastModule } from 'primeng/toast';
 import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { ApiService } from './services/api.service';
+import { SkeletonModule } from 'primeng/skeleton';
 
-interface Evidence {
-  file?: File | null;
-  sp_file_name: string | null;
-  percentage?: string | number;
-  link?: string | null;
+interface IUploadedFile {
+  name: string;
+  size: number;
 }
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, FileUploadModule, ButtonModule, BadgeModule, ProgressBarModule, ToastModule, HttpClientModule, CommonModule],
+  imports: [RouterOutlet, FileUploadModule, ButtonModule, BadgeModule, ProgressBarModule, ToastModule, HttpClientModule, CommonModule, SkeletonModule],
   providers: [MessageService],
+  animations: [],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -31,9 +32,15 @@ export class AppComponent {
 
   totalSize: number = 0;
 
-  totalSizePercent: number = 0;
+  isMiningLoading: boolean = false;
 
-  constructor(private config: PrimeNGConfig, private messageService: MessageService) {}
+  minningResult: string | null = null;
+
+  uploadedFile: IUploadedFile | null = null;
+
+  miningError: string | null = null;
+
+  constructor(private config: PrimeNGConfig, private messageService: MessageService, public _apiService: ApiService) {}
 
   choose(event: any, callback?: any) {
     callback();
@@ -42,13 +49,11 @@ export class AppComponent {
   onRemoveTemplatingFile(event: any, file: any, removeFileCallback: any, index: any) {
     removeFileCallback(event, index);
     this.totalSize -= parseInt(this.formatSize(file.size));
-    this.totalSizePercent = this.totalSize / 10;
   }
 
   onClearTemplatingUpload(clear: any) {
     clear();
     this.totalSize = 0;
-    this.totalSizePercent = 0;
   }
 
   onTemplatedUpload() {
@@ -60,11 +65,38 @@ export class AppComponent {
     this.files.forEach((file: any) => {
       this.totalSize += parseInt(this.formatSize(file.size));
     });
-    this.totalSizePercent = this.totalSize / 10;
   }
 
   uploadEvent(callback: any) {
-    callback();
+    // this.uploadedFile = this.files[0];
+
+    this._apiService.uploadFile(this.files[0]).subscribe({
+      next: (response: any) => {
+        console.log(response);
+        this.uploadedFile = this.files[0];
+        this.isMiningLoading = true;
+        // this.messageService.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', key: 'br', life: 3000 });
+        callback();
+      },
+      error: (error: any) => {
+        console.log(error);
+        // this.messageService.add({ severity: 'error', summary: 'Error', detail: 'File Upload Failed', key: 'br', life: 3000 });
+      }
+    });
+
+    this._apiService.textMining().subscribe({
+      next: (response: any) => {
+        console.log(response);
+        this.isMiningLoading = false;
+        this.minningResult = response.response;
+        // this.messageService.add({ severity: 'info', summary: 'Success', detail: 'Text Mining Completed', key: 'br', life: 3000 });
+      },
+      error: (error: any) => {
+        console.log(error);
+        this.isMiningLoading = false;
+        // this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Text Mining Failed', key: 'br', life: 3000 });
+      }
+    });
   }
 
   formatSize(bytes: any) {

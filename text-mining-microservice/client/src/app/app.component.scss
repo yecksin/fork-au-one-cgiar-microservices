@@ -2,7 +2,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 98vh;
+  height: 98dvh;
   width: 100%;
 
   &__content {
@@ -10,18 +10,20 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    max-width: 1200px;
+    max-width: 700px;
     width: 100%;
     padding: 20px;
     border-radius: 5px;
+    height: 100%;
 
     &__card {
       background: #f9f9f9;
       padding: 2rem;
       border-radius: 10px;
       margin-bottom: 1rem;
-      max-width: 650px;
+      max-width: 660px;
       width: 100%;
+      transition: all 0.5s ease;
 
       &__header {
         display: flex;
@@ -48,12 +50,24 @@
         &--item {
           display: flex;
           border: 1px solid #e0e0e0;
+          border-radius: 15px;
           padding: 1.6rem;
           align-items: center;
           justify-content: space-between;
           gap: 0.8rem;
           width: 100%;
+          background-color: #fff;
         }
+      }
+
+      &__skeleton {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      &__mining {
+        transition: all 0.5s ease;
       }
     }
   }
