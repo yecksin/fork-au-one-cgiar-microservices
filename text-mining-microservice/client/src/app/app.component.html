@@ -2,7 +2,7 @@
   <div class="main__content" [ngStyle]="{ 'justify-content': uploadedFile ? 'flex-start' : 'center' }">
     <div class="main__content__card">
       @if ( !uploadedFile ){
-      <p-fileUpload name="myfile[]" url="https://www.primefaces.org/cdn/api/upload.php" [multiple]="false" accept="image/*,application/pdf" maxFileSize="1000000" (onUpload)="onTemplatedUpload()" (onSelect)="onSelectedFiles($event)">
+      <p-fileUpload name="myfile[]" url="https://www.primefaces.org/cdn/api/upload.php" [multiple]="false" accept="image/*,application/pdf" maxFileSize="50000000" (onUpload)="onTemplatedUpload()" (onSelect)="onSelectedFiles($event)">
         <ng-template pTemplate="header" let-files let-uploadedFiles="uploadedFiles" let-chooseCallback="chooseCallback" let-clearCallback="clearCallback" let-uploadCallback="uploadCallback">
           <div class="main__content__card__header">
             <div class="main__content__card__header--buttons">
