@@ -1,41 +1,18 @@
-import { Controller, Post, Body, Param } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { MailerService } from './mailer.service';
 import { ConfigMessageDto } from '../../shared/global-dto/mailer.dto';
-import { ApiBody, ApiParam } from '@nestjs/swagger';
-import { MailerTypeEnum } from '../../shared/enum/mailer-type.enum';
+import { RabbitMQService } from '../../tools/rabbitmq/rabbitmq.service';
 
-@Controller('mailer')
+@Controller()
 export class MailerController {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    private readonly mailerService: MailerService,
+    private readonly rabbitMQService: RabbitMQService,
+  ) {}
 
   //TODO: Implement the sendMail method
-  @Post('send/:type')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        subject: { type: 'string' },
-        message: { type: 'string' },
-        to: { type: 'string' },
-      },
-    },
-  })
-  @ApiParam({
-    name: 'type',
-    required: true,
-    enum: MailerTypeEnum,
-  })
-  sendMail(
-    @Body() configMessageDto: ConfigMessageDto,
-    @Param('type') type: string,
-  ) {
-    return this.mailerService.sendMail({
-      body: {
-        title: 'Correo de pruebas',
-        message: 'Este es un correo de pruebas',
-      },
-      subject: 'Correo de pruebas',
-      to: ['', ''],
-    });
+  @Post('send-mail')
+  sendMail(@Body() configMessageDto: ConfigMessageDto) {
+    this.rabbitMQService.sendToQueue('messages_queue', configMessageDto);
   }
 }

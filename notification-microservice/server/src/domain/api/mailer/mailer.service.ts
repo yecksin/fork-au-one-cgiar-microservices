@@ -26,7 +26,7 @@ export class MailerService {
     const emailsTo: string = this._formatEmailList(configMessage?.to);
     if (!emailsTo.length) throw new BadRequestException('Email is required');
 
-    return this.transporter.sendMail({
+    this.transporter.sendMail({
       to: emailsTo,
       subject: subject,
       html: configMessage.body.message,
