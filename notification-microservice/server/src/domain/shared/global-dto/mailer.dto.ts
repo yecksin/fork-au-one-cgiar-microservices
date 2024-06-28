@@ -1,17 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-class MailerBodyDto {
+class EmailBodyMessage {
   @ApiProperty()
-  title: string;
+  text?: string;
+  @ApiProperty({ required: false })
+  file?: string;
+}
+
+class EmailBody {
   @ApiProperty()
-  message: string;
+  subject: string;
+  @ApiProperty()
+  to: string;
+  @ApiProperty()
+  cc?: string;
+  @ApiProperty()
+  bcc?: string;
+  @ApiProperty()
+  message: EmailBodyMessage;
 }
 
 export class ConfigMessageDto {
   @ApiProperty()
-  subject: string;
+  from?: string;
   @ApiProperty()
-  body: MailerBodyDto;
-  @ApiProperty()
-  to: string | string[];
+  emailBody: EmailBody;
+  @ApiProperty({ required: false })
+  environment?: string;
 }

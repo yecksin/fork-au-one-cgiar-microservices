@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { connect, Channel, Connection } from 'amqplib';
 import { MailerService } from '../../api/mailer/mailer.service';
+import { ConfigMessageDto } from '../../shared/global-dto/mailer.dto';
 
 @Injectable()
 export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
@@ -12,7 +13,17 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() {
     this.connection = await connect('amqp://localhost');
     this.channel = await this.connection.createChannel();
-    await this.channel.assertQueue('tasks', { durable: true });
+    await this.initQueue('messages_queue');
+    this.consumeQueue<ConfigMessageDto>('messages_queue', async (data) =>
+      this._mailerService.sendMail(data),
+    );
+  }
+
+  async initQueue(...queues: string[]) {
+    if (!queues.length) return;
+    for (const queue of queues) {
+      await this.channel.assertQueue(queue, { durable: true });
+    }
   }
 
   async sendToQueue<T>(queue: string, message: T) {
