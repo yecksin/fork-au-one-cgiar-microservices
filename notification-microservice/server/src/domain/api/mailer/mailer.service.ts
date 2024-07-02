@@ -1,4 +1,9 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { Transporter, createTransport } from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { env } from 'process';
@@ -9,6 +14,7 @@ import { ResponseUtils } from '../../shared/utils/response.utils';
 
 @Injectable()
 export class MailerService {
+  private readonly _logger = new Logger(MailerService.name);
   private transporter: Transporter<SMTPTransport.SentMessageInfo>;
   constructor() {
     this.transporter = createTransport({
@@ -45,16 +51,20 @@ export class MailerService {
     const emailFrom: string = configMessage?.from || `${env.EMAIL_ROOT}`;
     if (!emailsTo.length) throw new BadRequestException('Email is required');
 
-    this.transporter.sendMail({
-      to: emailsTo,
-      cc: emailsCc,
-      bcc: emailsBcc,
-      from: { name: 'No-reply', address: emailFrom },
-      subject: `${this._getEnv(configMessage.environment)}${subject}`,
-      html:
-        configMessage?.emailBody?.message?.file ||
-        configMessage?.emailBody?.message?.text,
-    });
+    this.transporter
+      .sendMail({
+        to: emailsTo,
+        cc: emailsCc,
+        bcc: emailsBcc,
+        from: { name: 'No-reply', address: emailFrom },
+        subject: `${this._getEnv(configMessage.environment)}${subject}`,
+        html:
+          configMessage?.emailBody?.message?.file ||
+          configMessage?.emailBody?.message?.text,
+      })
+      .catch((error) => {
+        this._logger.error(error);
+      });
   }
 
   subscribeApplication(newApplication: SubscribeApplicationDto) {

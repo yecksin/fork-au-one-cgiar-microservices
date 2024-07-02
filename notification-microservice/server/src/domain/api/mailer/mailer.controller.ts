@@ -9,9 +9,9 @@ import { ConfigMessageDto } from '../../shared/global-dto/mailer.dto';
 import { RabbitMQService } from '../../tools/rabbitmq/rabbitmq.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiHeader } from '@nestjs/swagger';
-import { ResponseUtils } from '../../shared/utils/response.utils';
 import { MailerService } from './mailer.service';
 import { SearchRequest } from '../../shared/decorators/search-request.decorator';
+import { ResponseUtils } from '../../shared/utils/response.utils';
 
 @Controller()
 export class MailerController {
@@ -88,6 +88,10 @@ export class MailerController {
       temp.emailBody.message.file = null;
     }
     this.rabbitMQService.sendToQueue('messages_queue', temp);
+    return ResponseUtils.format({
+      description: 'Message sent successfully',
+      status: 200,
+    });
   }
 
   @Post('subscribe-application')
