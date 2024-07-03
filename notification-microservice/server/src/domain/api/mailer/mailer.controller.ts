@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  HttpStatus,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -12,6 +13,7 @@ import { ApiBody, ApiConsumes, ApiHeader } from '@nestjs/swagger';
 import { MailerService } from './mailer.service';
 import { SearchRequest } from '../../shared/decorators/search-request.decorator';
 import { ResponseUtils } from '../../shared/utils/response.utils';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller()
 export class MailerController {
@@ -87,10 +89,20 @@ export class MailerController {
     } else {
       temp.emailBody.message.file = null;
     }
-    this.rabbitMQService.sendToQueue('messages_queue', temp);
+    this.rabbitMQService.sendToQueue('send', temp);
     return ResponseUtils.format({
       description: 'Message sent successfully',
-      status: 200,
+      status: HttpStatus.OK,
+    });
+  }
+
+  @MessagePattern('send')
+  async handleIncomingMessage(@Payload() data: string) {
+    const newMessage: ConfigMessageDto = JSON.parse(data);
+    await this._mailerService.sendMail(newMessage);
+    return ResponseUtils.format({
+      description: 'Message sent successfully',
+      status: HttpStatus.OK,
     });
   }
 

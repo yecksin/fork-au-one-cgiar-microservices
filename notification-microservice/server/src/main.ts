@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
 import { env } from 'process';
 import { json, urlencoded } from 'express';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const logger: Logger = new Logger('Bootstrap');
@@ -24,6 +25,18 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
+  const microservice =
+    await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
+      transport: Transport.RMQ,
+      options: {
+        urls: ['amqp://localhost:5672'],
+        queue: 'messages_queue',
+        queueOptions: {
+          durable: true,
+        },
+      },
+    });
+
   await app
     .listen(port)
     .then(() => {
@@ -33,6 +46,16 @@ async function bootstrap() {
     .catch((err) => {
       const portValue: number | string = port || '<Not defined>';
       logger.error(`Application failed to start on port ${portValue}`);
+      logger.error(err);
+    });
+
+  await microservice
+    .listen()
+    .then(() => {
+      logger.debug(`Microservice is already listeing`);
+    })
+    .catch((err) => {
+      logger.error(`Microservice present an error`);
       logger.error(err);
     });
 }

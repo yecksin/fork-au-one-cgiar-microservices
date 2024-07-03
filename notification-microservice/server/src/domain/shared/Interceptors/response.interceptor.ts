@@ -21,7 +21,7 @@ export class ResponseInterceptor implements NestInterceptor {
     const ctx = context.switchToHttp();
     const response: Response = ctx.getResponse<Response>();
     const request: Request = ctx.getRequest<Request>();
-    const ip = request.socket.remoteAddress;
+    const ip = request.socket?.remoteAddress || 'Microservice';
 
     return next.handle().pipe(
       map((res: any) => {
@@ -51,7 +51,7 @@ export class ResponseInterceptor implements NestInterceptor {
 
         this.logBasedOnStatus(modifiedData.status, description, res?.stack);
 
-        response.status(modifiedData.status);
+        response?.status?.(modifiedData.status);
         return modifiedData;
       }),
     );
@@ -78,11 +78,7 @@ export class ResponseInterceptor implements NestInterceptor {
   }
 
   private isServiceResponseDto(arg: any): arg is ServiceResponseDto<unknown> {
-    return (
-      arg?.data !== undefined &&
-      arg?.status !== undefined &&
-      arg?.description !== undefined
-    );
+    return arg?.status !== undefined && arg?.description !== undefined;
   }
 
   private isError(arg: any): arg is InternalServerErrorException {
