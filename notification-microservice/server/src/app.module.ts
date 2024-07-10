@@ -13,8 +13,9 @@ import { ResponseInterceptor } from './domain/shared/Interceptors/response.inter
 import { LoggingInterceptor } from './domain/shared/Interceptors/logging.interceptor';
 import { JwtMiddleware } from './domain/shared/middlewares/jwr.middleware';
 import { routes as mainRoutes } from './domain/routes/main.routes';
+import { ClarisaModule } from './domain/tools/clarisa/clarisa.module';
 @Module({
-  imports: [MailerModule, RouterModule.register(mainRoutes)],
+  imports: [MailerModule, RouterModule.register(mainRoutes), ClarisaModule],
   controllers: [AppController],
   providers: [
     AppService,

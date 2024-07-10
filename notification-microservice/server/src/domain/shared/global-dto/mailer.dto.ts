@@ -20,9 +20,16 @@ class EmailBody {
   message: EmailBodyMessage;
 }
 
+class FromBody {
+  @ApiProperty()
+  email: string;
+  @ApiProperty()
+  name?: string;
+}
+
 export class ConfigMessageDto {
   @ApiProperty()
-  from?: string;
+  from?: FromBody;
   @ApiProperty()
   emailBody: EmailBody;
   @ApiProperty({ required: false })

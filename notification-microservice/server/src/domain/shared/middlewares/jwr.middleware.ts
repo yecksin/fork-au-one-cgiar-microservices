@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { Injectable, NestMiddleware, Next, Req, Res } from '@nestjs/common';
 import { AuthorizationDto } from '../global-dto/auth.dto';
+import { ClarisaService } from '../../tools/clarisa/clarisa.service';
 
 @Injectable()
 export class JwtMiddleware implements NestMiddleware {
-  constructor() {}
+  constructor(private readonly clarisaService: ClarisaService) {}
 
   use(
     @Req() req: RequestWithCustomAttrs,
@@ -37,6 +38,14 @@ export class JwtMiddleware implements NestMiddleware {
     req.applicationEnv = 'development';
     //-----------------------------------------
     next();
+  }
+
+  private async validateCredentials(credentials: AuthorizationDto) {
+    this.clarisaService
+      .authorization(credentials.username, credentials.password)
+      .then((res) => {
+        return res?.receiver_mis?.environment;
+      });
   }
 }
 

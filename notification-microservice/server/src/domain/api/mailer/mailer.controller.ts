@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  HttpStatus,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -12,8 +11,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiHeader } from '@nestjs/swagger';
 import { MailerService } from './mailer.service';
 import { SearchRequest } from '../../shared/decorators/search-request.decorator';
-import { ResponseUtils } from '../../shared/utils/response.utils';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { SubscribeApplicationDto } from './dto/ubscribe-application.dto';
 
 @Controller()
 export class MailerController {
@@ -75,7 +74,7 @@ export class MailerController {
   })
   @Post('send')
   @UseInterceptors(FileInterceptor('file'))
-  sendMail(
+  async sendMail(
     @UploadedFile() file: Express.Multer.File,
     @Body() configMessageDto: ConfigMessageDto,
     @SearchRequest('applicationEnv') appEnv: string,
@@ -89,29 +88,23 @@ export class MailerController {
     } else {
       temp.emailBody.message.file = null;
     }
-    this.rabbitMQService.sendToQueue('send', temp);
-    return ResponseUtils.format({
-      description: 'Message sent successfully',
-      status: HttpStatus.OK,
-    });
+    return this._mailerService.sendMail(temp);
   }
 
   @MessagePattern('send')
   async handleIncomingMessage(@Payload() data: string) {
     const newMessage: ConfigMessageDto = JSON.parse(data);
-    await this._mailerService.sendMail(newMessage);
-    return ResponseUtils.format({
-      description: 'Message sent successfully',
-      status: HttpStatus.OK,
-    });
+    return this._mailerService.sendMail(newMessage);
+  }
+
+  @MessagePattern('subscribe-application')
+  async handleIncomingSubscription(@Payload() data: string) {
+    const newApplication: SubscribeApplicationDto = JSON.parse(data);
+    return this._mailerService.subscribeApplication(newApplication);
   }
 
   @Post('subscribe-application')
-  subscribeApplication() {
-    return this._mailerService.subscribeApplication({
-      clientName: 'PRMS-test',
-      domain: 'https://prms-test.com',
-      environmentName: 'development',
-    });
+  subscribeApplication(@Body() newApplication: SubscribeApplicationDto) {
+    return this._mailerService.subscribeApplication(newApplication);
   }
 }
