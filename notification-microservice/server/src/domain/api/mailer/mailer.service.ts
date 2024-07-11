@@ -29,20 +29,12 @@ export class MailerService {
       tls: {
         rejectUnauthorized: false,
       },
-      //service: 'gmail',
-      //auth: { user: env.EMAIL_ROOT, pass: env.EMAIL_PASSWORD },
     });
   }
 
   private _getEnv(environment: string): string {
-    switch (environment) {
-      case 'production':
-        return '';
-      case 'development':
-        return 'DEV - ';
-      default:
-        return 'TEST - ';
-    }
+    if (environment !== 'PROD') return `${environment} - `;
+    return '';
   }
 
   async sendMail(
@@ -90,14 +82,17 @@ export class MailerService {
   }
 
   async subscribeApplication(newApplication: SubscribeApplicationDto) {
-    const resData = await this._clarisaService.createConnection({
-      acronym: newApplication.acronym,
-      environment: newApplication.environment,
-    });
-    return ResponseUtils.format({
-      description: 'Application subscribed successfully',
-      data: resData,
-      status: HttpStatus.CREATED,
-    });
+    return this._clarisaService
+      .createConnection({
+        acronym: newApplication.acronym,
+        environment: newApplication.environment,
+      })
+      .then((res) =>
+        ResponseUtils.format({
+          description: 'Application subscribed successfully',
+          data: res,
+          status: HttpStatus.CREATED,
+        }),
+      );
   }
 }

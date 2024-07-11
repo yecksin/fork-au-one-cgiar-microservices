@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { MailerService } from '../../api/mailer/mailer.service';
 import {
   ClientProxy,
   ClientProxyFactory,
@@ -10,7 +9,7 @@ import {
 export class RabbitMQService {
   private client: ClientProxy;
 
-  constructor(private readonly _mailerService: MailerService) {
+  constructor() {
     this.client = ClientProxyFactory.create({
       transport: Transport.RMQ,
       options: {

@@ -27,13 +27,14 @@ export class ClarisaService {
   async authorization(clientId: string, clientSecret: string) {
     return this.connection
       .post<ClarisaSecret, ResponseClarisaDtio<ResClarisaValidateConectioDto>>(
-        'app-secret/validate',
+        'app-secrets/validate',
         {
           client_id: clientId,
           secret: clientSecret,
         },
       )
-      .then((res) => res.data);
+      .then((res) => this.formatValid(res))
+      .catch((err) => this.formatValid(err));
   }
 
   async createConnection(
@@ -47,11 +48,29 @@ export class ClarisaService {
         receiver_mis: this.misSettings,
         sender_mis: mis,
       })
-      .then((res) => res.data);
+      .then((res) => res.response);
+  }
+
+  formatValid<T>(data: ResponseClarisaDtio<T>): ResponseValidateClarisa<T> {
+    if (data.status >= 200 && data.status < 300) {
+      return {
+        data: data.response,
+        valid: true,
+      };
+    }
+    return {
+      data: null,
+      valid: false,
+    };
   }
 }
 
 class ClarisaSecret {
   client_id: string;
   secret: string;
+}
+
+class ResponseValidateClarisa<T> {
+  data: T;
+  valid: boolean;
 }

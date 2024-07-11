@@ -19,11 +19,13 @@ export class Clarisa {
   }
 
   private async getToken(): Promise<string> {
-    if (this.token && this.validToken(this.token)) {
+    if (!this.token || !this.validToken(this.token)) {
       this.token = await firstValueFrom(
-        this.http
-          .post(this.clarisaHost + 'auth', this.authBody)
-          .pipe(map(({ data }) => data.access_token)),
+        this.http.post(env.CLARISA_HOST + 'auth/login', this.authBody).pipe(
+          map(({ data }) => {
+            return data.access_token;
+          }),
+        ),
       );
     }
     return this.token;

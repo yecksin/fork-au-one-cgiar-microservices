@@ -6,30 +6,35 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { AuthorizationDto } from '../global-dto/auth.dto';
+import { map } from 'rxjs/operators';
 import { ClarisaService } from '../../tools/clarisa/clarisa.service';
+import { ConfigMessageSocketDto } from '../global-dto/mailer.dto';
+import { ResClarisaValidateConectioDto } from '../../tools/clarisa/dtos/clarisa-create-conection.dto';
 
 @Injectable()
 export class AuthInterceptor implements NestInterceptor {
   constructor(private readonly clarisaService: ClarisaService) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const data = context.switchToRpc().getData();
-    const { auth }: { auth: AuthorizationDto } = data;
-    const env = this.validateCredentials(auth);
-    if (typeof env === 'undefined') {
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<any>> {
+    const data = JSON.parse(context.switchToRpc().getData() || '{}');
+    const payload: ConfigMessageSocketDto = data;
+    const authData = await this.clarisaService.authorization(
+      payload?.auth?.username,
+      payload?.auth?.password,
+    );
+    if (!authData.valid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return next.handle().pipe(tap(() => console.log('Request processed')));
-  }
+    payload.data.environment = (
+      authData.data as ResClarisaValidateConectioDto
+    ).receiver_mis.environment;
 
-  private async validateCredentials(credentials: AuthorizationDto) {
-    this.clarisaService
-      .authorization(credentials.username, credentials.password)
-      .then((res) => {
-        return res?.receiver_mis?.environment;
-      });
+    return next
+      .handle()
+      .pipe(map((_data) => ({ ...payload, application: authData.data })));
   }
 }

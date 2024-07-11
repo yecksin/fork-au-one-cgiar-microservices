@@ -1,8 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { AuthorizationDto } from './auth.dto';
 
 class EmailBodyMessage {
   @ApiProperty()
   text?: string;
+  @ApiProperty()
+  socketFile?: Express.Multer.File;
   @ApiProperty({ required: false })
   file?: string;
 }
@@ -34,4 +37,9 @@ export class ConfigMessageDto {
   emailBody: EmailBody;
   @ApiProperty({ required: false })
   environment?: string;
+}
+
+export class ConfigMessageSocketDto {
+  public auth: AuthorizationDto;
+  public data: ConfigMessageDto;
 }
