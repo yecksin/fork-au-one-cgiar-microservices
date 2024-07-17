@@ -25,8 +25,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  // const queueHost: string = `amqps://${env.MQ_USER}:${env.MQ_PASSWORD}@${env.MQ_HOST}`;
-
   const queueName: string = `${env.QUEUE_NAME}reports_queue`;
 
   const microservice =
