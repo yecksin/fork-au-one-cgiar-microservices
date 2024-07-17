@@ -1,38 +1,42 @@
-# compiled output
-/dist
-/node_modules
+# Ignorar todos los archivos .env en cualquier subdirectorio
+**/.env
 
-# Logs
-logs
-*.log
-npm-debug.log*
-pnpm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
+# Ignorar node_modules en cualquier subdirectorio
+**/node_modules/
 
-# OS
-.DS_Store
+# Ignorar archivos de compilación
+**/dist/
+**/build/
 
-# Tests
-/coverage
-/.nyc_output
+# Ignorar archivos de logs
+**/logs
+**/*.log
 
-# Environment
-.env
+# Ignorar archivos de caché de npm
+**/.npm
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
+# Ignorar archivos de caché de yarn
+**/.yarn-cache
 
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+# Ignorar archivos de cobertura
+**/coverage/
+
+# Ignorar archivos temporales
+**/.tmp
+**/.temp
+
+# Ignorar archivos de IDE y editores
+**/.idea/
+**/.vscode/
+**/*.swp
+**/*.swo
+
+# Ignorar archivos del sistema operativo
+**/.DS_Store
+**/Thumbs.db
+
+# Ignorar archivos de configuración local
+**/*.local
+
+# Mantener archivos de ejemplo .env
+!**/.env.example
