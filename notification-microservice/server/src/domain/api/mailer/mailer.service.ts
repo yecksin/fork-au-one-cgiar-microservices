@@ -26,6 +26,8 @@ export class MailerService {
       port: parseInt(env.SERVER_SMTP_PORT),
       logger: ENV.IS_PRODUCTION,
       debug: ENV.IS_PRODUCTION,
+      logger: !ENV.IS_PRODUCTION,
+      debug: !ENV.IS_PRODUCTION,
       secure: false,
       ignoreTLS: true,
       tls: {

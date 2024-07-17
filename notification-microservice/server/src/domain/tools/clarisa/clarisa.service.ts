@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Clarisa } from './clarisa.connection';
 import { HttpService } from '@nestjs/axios';
 import { env } from 'process';
@@ -33,7 +33,16 @@ export class ClarisaService {
           secret: clientSecret,
         },
       )
-      .then((res) => this.formatValid(res))
+      .then((res) => {
+        const response = this.formatValid(res);
+        if (
+          response.data.receiver_mis.acronym !== env.CLARISA_MIS ||
+          response.data.receiver_mis.environment !== env.CLARISA_MIS_ENV
+        ) {
+          throw new BadRequestException('Invalid credentials.');
+        }
+        return response;
+      })
       .catch((err) => this.formatValid(err));
   }
 
@@ -44,7 +53,7 @@ export class ClarisaService {
       .post<
         ClarisaCreateConenctionDto,
         ResponseClarisaDtio<ResClarisaCreateConectioDto>
-      >('app-secret/create', {
+      >('app-secrets/create', {
         receiver_mis: this.misSettings,
         sender_mis: mis,
       })
