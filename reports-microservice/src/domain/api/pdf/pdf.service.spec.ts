@@ -1,10 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PdfService } from './pdf.service';
-import * as puppeteer from 'puppeteer';
-import * as handlebars from 'handlebars';
 import { CreatePdfDto } from './dto/create-pdf.dto';
+import { Readable } from 'stream';
+import * as pdfCreator from 'pdf-creator-node';
 
-jest.mock('puppeteer');
+jest.mock('pdf-creator-node', () => ({
+  create: jest.fn(),
+}));
 
 describe('PdfService', () => {
   let service: PdfService;
@@ -17,27 +19,53 @@ describe('PdfService', () => {
     service = module.get<PdfService>(PdfService);
   });
 
-  it('should generate a PDF', async () => {
-    const createPdfDto: CreatePdfDto = {
-      data: { title: 'Test', message: 'Hello', image: 'test.jpg' },
-      templateData: '<div>{{name}}</div>',
-    };
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
 
-    const mockBrowser = {
-      newPage: jest.fn().mockResolvedValue({
-        setContent: jest.fn().mockResolvedValue(undefined),
-        pdf: jest.fn().mockResolvedValue(Buffer.from('mock-pdf')),
-        close: jest.fn().mockResolvedValue(undefined),
-      }),
-      close: jest.fn().mockResolvedValue(undefined),
-    };
-    (puppeteer.launch as jest.Mock).mockResolvedValue(mockBrowser);
+  describe('generatePdf', () => {
+    it('should generate a PDF and return a Buffer', async () => {
+      const createPdfDto: CreatePdfDto = {
+        data: { name: 'Test' },
+        templateData: '<h1>{{name}}</h1>',
+        options: {},
+      };
 
-    const pdf = await service.generatePdf(createPdfDto);
+      const mockReadStream = new Readable();
+      mockReadStream.push('test buffer');
+      mockReadStream.push(null);
 
-    expect(puppeteer.launch).toHaveBeenCalled();
-    expect(mockBrowser.newPage).toHaveBeenCalled();
-    expect(pdf).toBeInstanceOf(Buffer);
-    expect(pdf.toString()).toBe('mock-pdf');
+      (pdfCreator.create as jest.Mock).mockResolvedValue(mockReadStream);
+
+      const mockBuffer = Buffer.from('test buffer');
+      jest.spyOn(service, 'streamToBuffer').mockResolvedValue(mockBuffer);
+
+      const result = await service.generatePdf(createPdfDto);
+
+      expect(result).toBe(mockBuffer);
+      expect(pdfCreator.create).toHaveBeenCalledWith(
+        {
+          html: createPdfDto.templateData,
+          data: createPdfDto.data,
+          type: 'stream',
+        },
+        createPdfDto.options,
+      );
+      expect(service.streamToBuffer).toHaveBeenCalledWith(mockReadStream);
+    });
+
+    it('should throw an error if pdf creation fails', async () => {
+      const createPdfDto: CreatePdfDto = {
+        data: { name: 'Test' },
+        templateData: '<h1>{{name}}</h1>',
+        options: {},
+      };
+
+      (pdfCreator.create as jest.Mock).mockResolvedValue(null);
+
+      await expect(service.generatePdf(createPdfDto)).rejects.toThrow(
+        'Error generating pdf',
+      );
+    });
   });
 });

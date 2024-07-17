@@ -1,11 +1,11 @@
-import 'dotenv/config';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { NestFactory } from '@nestjs/core';
+import 'dotenv/config';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
 import { env } from 'process';
 import { json, urlencoded } from 'express';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const logger: Logger = new Logger('Bootstrap');
@@ -25,12 +25,16 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
+  // const queueHost: string = `amqps://${env.MQ_USER}:${env.MQ_PASSWORD}@${env.MQ_HOST}`;
+
+  const queueName: string = `${env.QUEUE_NAME}reports_queue`;
+
   const microservice =
     await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
       transport: Transport.RMQ,
       options: {
-        urls: ['amqp://localhost:5672'],
-        queue: 'pdf_reports_queue',
+        urls: [env.RABBITMQ_URL],
+        queue: queueName,
         queueOptions: {
           durable: true,
         },

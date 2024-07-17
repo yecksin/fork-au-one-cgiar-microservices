@@ -5,17 +5,19 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import { PdfService } from '../../api/pdf/pdf.service';
+import { env } from 'process';
 
 @Injectable()
 export class RabbitMQService {
   private client: ClientProxy;
 
   constructor(private readonly _pdfService: PdfService) {
+    const queueName: string = `${env.QUEUE_NAME}reports_pdf_queue`;
     this.client = ClientProxyFactory.create({
       transport: Transport.RMQ,
       options: {
-        urls: ['amqp://localhost:5672'],
-        queue: 'pdf_reports_queue',
+        urls: [env.RABBITMQ_URL],
+        queue: queueName,
         queueOptions: {
           durable: true,
         },

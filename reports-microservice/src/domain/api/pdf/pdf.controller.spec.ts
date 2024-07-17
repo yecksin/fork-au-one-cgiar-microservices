@@ -1,65 +1,76 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PdfController } from './pdf.controller';
 import { PdfService } from './pdf.service';
-import { Response } from 'express';
+import { RabbitMQService } from '../../tools/rabbitmq/rabbitmq.service';
 import { CreatePdfDto } from './dto/create-pdf.dto';
+import { Response } from 'express';
+
+jest.mock('./pdf.service');
+jest.mock('../../tools/rabbitmq/rabbitmq.service');
 
 describe('PdfController', () => {
-  let controller: PdfController;
-  let service: PdfService;
+  let pdfController: PdfController;
+  let pdfService: PdfService;
+  let rabbitMQService: RabbitMQService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PdfController],
-      providers: [
-        {
-          provide: PdfService,
-          useValue: {
-            generatePdf: jest.fn(),
-          },
-        },
-      ],
+      providers: [PdfService, RabbitMQService],
     }).compile();
 
-    controller = module.get<PdfController>(PdfController);
-    service = module.get<PdfService>(PdfService);
+    pdfController = module.get<PdfController>(PdfController);
+    pdfService = module.get<PdfService>(PdfService);
+    rabbitMQService = module.get<RabbitMQService>(RabbitMQService);
   });
 
-  it('should generate a PDF and send it in the response', async () => {
-    const createPdfDto: CreatePdfDto = {
-      data: { title: 'Test', message: 'Hello', image: 'test.jpg' },
-      templateData: '<div>{{title}}</div>',
-    };
-    const pdfBuffer = Buffer.from('mock-pdf');
-    jest.spyOn(service, 'generatePdf').mockResolvedValue(pdfBuffer);
+  it('should be defined', () => {
+    expect(pdfController).toBeDefined();
+  });
 
-    const res = {
-      set: jest.fn(),
-      end: jest.fn(),
-    } as unknown as Response;
+  describe('generatePdfHttpNode', () => {
+    it('should generate a PDF and send it in the response', async () => {
+      const createPdfDto: CreatePdfDto = {
+        data: { name: 'Test' },
+        templateData: '<h1>{{name}}</h1>',
+        options: {},
+      };
 
-    await controller.generatePdfHttp(createPdfDto, res);
+      const mockBuffer = Buffer.from('test buffer');
+      jest.spyOn(pdfService, 'generatePdf').mockResolvedValue(mockBuffer);
 
-    expect(service.generatePdf).toHaveBeenCalledWith(createPdfDto);
-    expect(res.set).toHaveBeenCalledWith({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename=report.pdf',
-      'Content-Length': pdfBuffer.length,
+      const mockRes = {
+        set: jest.fn(),
+        end: jest.fn(),
+      } as any as Response;
+
+      await pdfController.generatePdfHttpNode(createPdfDto, mockRes);
+
+      expect(pdfService.generatePdf).toHaveBeenCalledWith(createPdfDto);
+      expect(mockRes.set).toHaveBeenCalledWith({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'attachment; filename=report.pdf',
+        'Content-Length': mockBuffer.length,
+      });
+      expect(mockRes.end).toHaveBeenCalledWith(mockBuffer);
     });
-    expect(res.end).toHaveBeenCalledWith(pdfBuffer);
   });
 
-  it('should generate a PDF from a message', async () => {
-    const createPdfDto: CreatePdfDto = {
-      data: { title: 'Test', message: 'Hello', image: 'test.jpg' },
-      templateData: '<div>{{title}}</div>',
-    };
-    const pdfBuffer = Buffer.from('mock-pdf');
-    jest.spyOn(service, 'generatePdf').mockResolvedValue(pdfBuffer);
+  describe('generatePdfNode', () => {
+    it('should generate a PDF and return the buffer', async () => {
+      const createPdfDto: CreatePdfDto = {
+        data: { name: 'Test' },
+        templateData: '<h1>{{name}}</h1>',
+        options: {},
+      };
 
-    const result = await controller.generatePdf(createPdfDto);
+      const mockBuffer = Buffer.from('test buffer');
+      jest.spyOn(pdfService, 'generatePdf').mockResolvedValue(mockBuffer);
 
-    expect(service.generatePdf).toHaveBeenCalledWith(createPdfDto);
-    expect(result).toBe(pdfBuffer);
+      const result = await pdfController.generatePdfNode(createPdfDto);
+
+      expect(pdfService.generatePdf).toHaveBeenCalledWith(createPdfDto);
+      expect(result).toBe(mockBuffer);
+    });
   });
 });

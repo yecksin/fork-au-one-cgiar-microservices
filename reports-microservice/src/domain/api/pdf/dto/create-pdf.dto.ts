@@ -3,9 +3,3 @@ export class CreatePdfDto {
   templateData: string;
   options: any;
 }
-
-interface DataPdf {
-  title: string;
-  message: string;
-  image: string;
-}
