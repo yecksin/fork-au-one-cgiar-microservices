@@ -7,7 +7,7 @@ class EmailBodyMessage {
   @ApiProperty()
   socketFile?: Express.Multer.File;
   @ApiProperty({ required: false })
-  file?: string;
+  file?: Buffer;
 }
 
 class EmailBody {

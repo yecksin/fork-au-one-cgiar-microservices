@@ -32,23 +32,20 @@ export class MailerController {
           format: 'binary',
           description: 'File to upload',
         },
-        from: { type: 'string' },
+        from: { type: 'object' },
         emailBody: {
           type: 'object',
           properties: {
             subject: { type: 'string' },
             to: {
-              type: 'array',
-              items: { type: 'string' },
+              type: 'string',
             },
             cc: {
-              type: 'array',
-              items: { type: 'string' },
+              type: 'string',
               nullable: true,
             },
             bcc: {
-              type: 'array',
-              items: { type: 'string' },
+              type: 'string',
               nullable: true,
             },
             message: {
@@ -82,10 +79,10 @@ export class MailerController {
   ) {
     const temp = configMessageDto;
     temp.emailBody = JSON.parse(String(configMessageDto.emailBody));
+    temp.from = JSON.parse(String(configMessageDto.from));
     temp.environment = appConect.environment;
-
     if (file && file?.mimetype === 'text/html') {
-      temp.emailBody.message.file = file.buffer.toString('utf8');
+      temp.emailBody.message.file = file.buffer;
     } else {
       temp.emailBody.message.file = null;
     }
@@ -98,18 +95,12 @@ export class MailerController {
     const newMessage: ConfigMessageSocketDto = JSON.parse(data);
     const file = newMessage.data?.emailBody?.message?.socketFile;
     if (file && file?.mimetype === 'text/html') {
-      newMessage.data.emailBody.message.file = file.buffer.toString('utf8');
+      newMessage.data.emailBody.message.file = file.buffer;
     } else {
       newMessage.data.emailBody.message.file = null;
     }
     const message = newMessage.data;
     return this._mailerService.sendMail(message);
-  }
-
-  @MessagePattern('subscribe-application')
-  async handleIncomingSubscription(@Payload() data: string) {
-    const newApplication: SubscribeApplicationDto = JSON.parse(data);
-    return this._mailerService.subscribeApplication(newApplication);
   }
 
   @Post('subscribe-application')

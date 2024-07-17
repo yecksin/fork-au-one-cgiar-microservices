@@ -39,13 +39,13 @@ async function bootstrap() {
         logger.error(err);
       });
   }
-
+  const queueHost: string = `amqps://${env.MQ_USER}:${env.MQ_PASSWORD}@${env.MQ_HOST}`;
   const microservice =
     await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
       transport: Transport.RMQ,
       options: {
-        urls: [env.QUEUE_HOST],
-        queue: 'messages_queue',
+        urls: [queueHost],
+        queue: env.QUEUE_PATH,
         queueOptions: {
           durable: true,
         },

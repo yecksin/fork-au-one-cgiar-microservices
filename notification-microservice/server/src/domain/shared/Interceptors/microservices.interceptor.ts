@@ -29,12 +29,16 @@ export class AuthInterceptor implements NestInterceptor {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    payload.data.environment = (
-      authData.data as ResClarisaValidateConectioDto
-    ).receiver_mis.environment;
+    const newData = {
+      data: {
+        ...payload.data,
+        environment: (authData.data as ResClarisaValidateConectioDto)
+          .receiver_mis.environment,
+      },
+      auth: payload.auth,
+      application: authData.data,
+    };
 
-    return next
-      .handle()
-      .pipe(map((_data) => ({ ...payload, application: authData.data })));
+    return next.handle().pipe(map(() => newData));
   }
 }

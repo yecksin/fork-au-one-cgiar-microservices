@@ -70,7 +70,7 @@ class ClarisaSecret {
   secret: string;
 }
 
-class ResponseValidateClarisa<T> {
+export class ResponseValidateClarisa<T> {
   data: T;
   valid: boolean;
 }

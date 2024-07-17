@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { AuthorizationDto } from '../global-dto/auth.dto';
 import { ClarisaService } from '../../tools/clarisa/clarisa.service';
+import { ResClarisaValidateConectioDto } from '../../tools/clarisa/dtos/clarisa-create-conection.dto';
 
 @Injectable()
 export class JwtMiddleware implements NestMiddleware {
@@ -40,7 +41,9 @@ export class JwtMiddleware implements NestMiddleware {
     if (!authData.valid) {
       throw new UnauthorizedException('Invalid credentials.');
     }
-    req.application = authData.data;
+    req.application = (
+      authData.data as ResClarisaValidateConectioDto
+    ).receiver_mis;
     next();
   }
 }

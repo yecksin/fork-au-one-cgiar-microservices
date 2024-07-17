@@ -64,7 +64,10 @@ To send an email with both text and HTML options available, construct your messa
 
 ```json
 {
-  "from": "sender@example.com",
+  "from": {
+    "email": "from@example.com",
+    "name": "John Doe"
+  },
   "emailBody": {
     "subject": "Your Subject Here",
     "to": "recipient@example.com",
@@ -81,10 +84,65 @@ To send an email with both text and HTML options available, construct your messa
 
 To subscribe a new application and obtain a clientId and secretKey, use the subscribeApplication method. These credentials will allow the application to authenticate and use the provided services.
 
+## Steps to Use the Application
+
+1. **Access to Queue Broker:**
+
+   - The application that wishes to use the messaging services must have access to the queue broker.
+   - To obtain access, please contact technical support.
+
+2. **Integration and Registration with CLARISA:**
+
+   - Once you have access to the broker, the application must request integration and registration with the CLARISA database.
+   - This should also be done by contacting technical support.
+
+3.1 **Registering the Application with the Microservice:**
+
+- With the application identification provided by CLARISA (consisting of an `acronym: string` and an `environment: string`), register your application with the microservice using the following endpoint:
+  - **Endpoint:** `/api/email/subscribe-application`
+  - **Method:** `POST`
+  - **Request Body:**
+    ```json
+    {
+      "acronym": "string",
+      "environment": "string"
+    }
+    ```
+- This registration will return the credentials needed to use the microservice.
+
+  3.2 **Alternative Registration via Queue Broker:**
+
+- If HTTP requests are not enabled on the server, registration can be done via the broker in the `messages_queue` queue and the `subscribe-application` pattern.
+- The request body will be the same as the HTTP request.
+
+  3.3 This registration will return a `secret` and a `client_id`, which will be required to use the messaging service.
+
+4. **HTTP Requests:**
+   - HTTP requests must include an `auth` header with `username` and `password`:
+     ```json
+     {
+       "auth": {
+         "username": "string",
+         "password": "string"
+       }
+     }
+     ```
+
+4.2 **Broker Requests:**
+
+- When using the broker, the message must consist of `data` and `auth`. The `data` depends on the service being used, and the `auth` should have the same format as the HTTP header:
+  ```json
+  {
+    "data": {
+      // service-specific data
+    },
+    "auth": {
+      "username": "string",
+      "password": "string"
+    }
+  }
+  ```
+
 #### Development
 
 This microservice is developed in TypeScript, using Node.js. Standard TypeScript development practices are recommended for contributing to the project.
-
-#### Security
-
-Credentials (`clientId` and `secretKey`) should be treated as sensitive information. Ensure they are securely stored and not publicly exposed.
