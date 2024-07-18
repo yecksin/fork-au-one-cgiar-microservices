@@ -22,7 +22,7 @@ export class PdfService {
 
       const pdfStream: ReadStream = await createPDF(document, options);
 
-      if (!pdfStream) throw new Error('Error generating pdf');
+      if (!pdfStream) throw new Error('Error converting pdf to stream');
 
       const pdfBuffer: Buffer = await this.streamToBuffer(pdfStream);
       console.info('PDF generated successfully');
