@@ -11,6 +11,7 @@ import {
 import { AuthorizationDto } from '../global-dto/auth.dto';
 import { ClarisaService } from '../../tools/clarisa/clarisa.service';
 import { ResClarisaValidateConectioDto } from '../../tools/clarisa/dto/clarisa-create-conection.dto';
+import { env } from 'process';
 
 @Injectable()
 export class JwtMiddleware implements NestMiddleware {
@@ -38,9 +39,18 @@ export class JwtMiddleware implements NestMiddleware {
       authHeader.username,
       authHeader.password,
     );
-    if (!authData.valid) {
+
+    if (!authData.data) {
       throw new UnauthorizedException('Invalid credentials.');
     }
+    const ownerUser = env.CLARISA_MIS;
+    if (
+      (authData.data as ResClarisaValidateConectioDto).receiver_mis.acronym !==
+      ownerUser
+    ) {
+      throw new UnauthorizedException('Invalid credentials.');
+    }
+    
     req.application = (
       authData.data as ResClarisaValidateConectioDto
     ).receiver_mis;

@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ReadStream } from 'fs';
 import { create as createPDF } from 'pdf-creator-node';
 import { CreatePdfDto } from './dto/create-pdf.dto';
@@ -8,23 +8,28 @@ import { ResponseUtils } from '../../utils/response.utils';
 
 @Injectable()
 export class PdfService {
+  private readonly _logger = new Logger(PdfService.name);
   constructor(private readonly _clarisaService: ClarisaService) {}
 
   async generatePdf(createPdfDto: CreatePdfDto): Promise<Buffer> {
-    const { data, templateData, options } = createPdfDto;
-    const document = {
-      html: templateData,
-      data: data,
-      type: 'stream',
-    };
+    try {
+      const { data, templateData, options } = createPdfDto;
+      const document = {
+        html: templateData,
+        data: data,
+        type: 'stream',
+      };
 
-    const pdfStream: ReadStream = await createPDF(document, options);
+      const pdfStream: ReadStream = await createPDF(document, options);
 
-    if (!pdfStream) throw new Error('Error generating pdf');
+      if (!pdfStream) throw new Error('Error generating pdf');
 
-    const pdfBuffer: Buffer = await this.streamToBuffer(pdfStream);
-    console.info('PDF generated successfully');
-    return pdfBuffer;
+      const pdfBuffer: Buffer = await this.streamToBuffer(pdfStream);
+      console.info('PDF generated successfully');
+      return pdfBuffer;
+    } catch (error) {
+      this._logger.error(`Error generating pdf: ${error}`);
+    }
   }
 
   public streamToBuffer(stream: ReadStream): Promise<Buffer> {
@@ -49,6 +54,7 @@ export class PdfService {
         status: HttpStatus.CREATED,
       });
     } catch (error) {
+      this._logger.error(`Error subscribing application: ${error}`);
       return ResponseUtils.format({
         description: `Error subscribing application: ${error}`,
         data: null,

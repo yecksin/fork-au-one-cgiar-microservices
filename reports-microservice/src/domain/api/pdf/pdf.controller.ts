@@ -4,7 +4,6 @@ import { PdfService } from './pdf.service';
 import { Response } from 'express';
 import { CreatePdfDto } from './dto/create-pdf.dto';
 import { RabbitMQService } from '../../tools/rabbitmq/rabbitmq.service';
-import { ApiBody } from '@nestjs/swagger';
 import { SubscribeApplicationDto } from './dto/subscribe-application.dto';
 
 @Controller()
