@@ -1,0 +1,32 @@
+app: reports-microservice
+service: reports-microservice-dev
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  environment:
+    PORT: ${env:PORT}
+    RABBITMQ_URL: ${env:RABBITMQ_URL}
+    CLARISA_HOST: ${env:CLARISA_HOST}
+    CLARISA_MIS: ${env:CLARISA_MIS}
+    CLARISA_MIS_ENV: ${env:CLARISA_MIS_ENV}
+    CLARISA_LOGIN: ${env:CLARISA_LOGIN}
+    CLARISA_PASSWORD: ${env:CLARISA_PASSWORD}
+    IS_PRODUCTION: ${env:IS_PRODUCTION}
+    SEE_ALL_LOGS: ${env:SEE_ALL_LOGS}
+    QUEUE_NAME: ${env:QUEUE_NAME}
+
+functions:
+  main:
+    handler: dist/serverless.handler
+    events:
+      - http:
+          path: /
+          method: ANY
+          cors: true
+      - http:
+          method: ANY
+          path: /{proxy+}
+      

@@ -40,3 +40,5 @@
 
 # Mantener archivos de ejemplo .env
 !**/.env.example
+
+.serverless
