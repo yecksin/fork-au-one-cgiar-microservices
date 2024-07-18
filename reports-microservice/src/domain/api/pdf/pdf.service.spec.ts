@@ -3,6 +3,7 @@ import { PdfService } from './pdf.service';
 import { CreatePdfDto } from './dto/create-pdf.dto';
 import { Readable } from 'stream';
 import * as pdfCreator from 'pdf-creator-node';
+import { ClarisaModule } from '../../tools/clarisa/clarisa.module';
 
 jest.mock('pdf-creator-node', () => ({
   create: jest.fn(),
@@ -14,6 +15,7 @@ describe('PdfService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [PdfService],
+      imports: [ClarisaModule],
     }).compile();
 
     service = module.get<PdfService>(PdfService);
@@ -64,7 +66,7 @@ describe('PdfService', () => {
       (pdfCreator.create as jest.Mock).mockResolvedValue(null);
 
       await expect(service.generatePdf(createPdfDto)).rejects.toThrow(
-        'Error generating pdf',
+        `Error generating pdf`
       );
     });
   });

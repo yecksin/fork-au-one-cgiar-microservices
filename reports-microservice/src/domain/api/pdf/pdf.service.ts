@@ -29,6 +29,7 @@ export class PdfService {
       return pdfBuffer;
     } catch (error) {
       this._logger.error(`Error generating pdf: ${error}`);
+      throw new Error('Error generating pdf');
     }
   }
 

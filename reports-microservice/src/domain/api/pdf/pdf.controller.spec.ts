@@ -4,6 +4,7 @@ import { PdfService } from './pdf.service';
 import { RabbitMQService } from '../../tools/rabbitmq/rabbitmq.service';
 import { CreatePdfDto } from './dto/create-pdf.dto';
 import { Response } from 'express';
+import { ClarisaModule } from '../../tools/clarisa/clarisa.module';
 
 jest.mock('./pdf.service');
 jest.mock('../../tools/rabbitmq/rabbitmq.service');
@@ -17,6 +18,7 @@ describe('PdfController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PdfController],
       providers: [PdfService, RabbitMQService],
+      imports: [ClarisaModule],
     }).compile();
 
     pdfController = module.get<PdfController>(PdfController);
