@@ -1,6 +1,4 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { ReadStream } from 'fs';
-import { create as createPDF } from 'pdf-creator-node';
 import { CreatePdfDto } from './dto/create-pdf.dto';
 import { SubscribeApplicationDto } from './dto/subscribe-application.dto';
 import { ClarisaService } from '../../tools/clarisa/clarisa.service';
@@ -33,36 +31,36 @@ export class PdfService {
     return pdf;
   }
 
-  async generatePdf(createPdfDto: CreatePdfDto): Promise<Buffer> {
-    try {
-      const { data, templateData, options } = createPdfDto;
-      const document = {
-        html: templateData,
-        data: data,
-        type: 'stream',
-      };
+  // async generatePdf(createPdfDto: CreatePdfDto): Promise<Buffer> {
+  //   try {
+  //     const { data, templateData, options } = createPdfDto;
+  //     const document = {
+  //       html: templateData,
+  //       data: data,
+  //       type: 'stream',
+  //     };
 
-      const pdfStream: ReadStream = await createPDF(document, options);
+  //     const pdfStream: ReadStream = await createPDF(document, options);
 
-      if (!pdfStream) throw new Error('Error converting pdf to stream');
+  //     if (!pdfStream) throw new Error('Error converting pdf to stream');
 
-      const pdfBuffer: Buffer = await this.streamToBuffer(pdfStream);
-      console.info('PDF generated successfully');
-      return pdfBuffer;
-    } catch (error) {
-      this._logger.error(`Error generating pdf: ${error}`);
-      throw new Error(`Error generating pdf ${error}`);
-    }
-  }
+  //     const pdfBuffer: Buffer = await this.streamToBuffer(pdfStream);
+  //     console.info('PDF generated successfully');
+  //     return pdfBuffer;
+  //   } catch (error) {
+  //     this._logger.error(`Error generating pdf: ${error}`);
+  //     throw new Error(`Error generating pdf ${error}`);
+  //   }
+  // }
 
-  public streamToBuffer(stream: ReadStream): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      const chunks: Buffer[] = [];
-      stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-      stream.on('end', () => resolve(Buffer.concat(chunks)));
-      stream.on('error', (err) => reject(err));
-    });
-  }
+  // public streamToBuffer(stream: ReadStream): Promise<Buffer> {
+  //   return new Promise((resolve, reject) => {
+  //     const chunks: Buffer[] = [];
+  //     stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+  //     stream.on('end', () => resolve(Buffer.concat(chunks)));
+  //     stream.on('error', (err) => reject(err));
+  //   });
+  // }
 
   async subscribeApplication(newApplication: SubscribeApplicationDto) {
     try {

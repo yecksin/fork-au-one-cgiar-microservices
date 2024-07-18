@@ -35,27 +35,27 @@ export class PdfController {
     return pdf;
   }
 
-  @Post('generate')
-  async generatePdfHttpNode(
-    @Body() createPdfDto: CreatePdfDto,
-    @Res() res: Response,
-  ): Promise<void> {
-    const pdf = await this.pdfService.generatePdf(createPdfDto);
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename=report.pdf',
-      'Content-Length': pdf.length,
-    });
-    res.end(pdf);
-  }
+  // @Post('generate')
+  // async generatePdfHttpNode(
+  //   @Body() createPdfDto: CreatePdfDto,
+  //   @Res() res: Response,
+  // ): Promise<void> {
+  //   const pdf = await this.pdfService.generatePdf(createPdfDto);
+  //   res.set({
+  //     'Content-Type': 'application/pdf',
+  //     'Content-Disposition': 'attachment; filename=report.pdf',
+  //     'Content-Length': pdf.length,
+  //   });
+  //   res.end(pdf);
+  // }
 
-  @MessagePattern('generate')
-  async generatePdfNode(
-    @Payload() createPdfDto: CreatePdfDto,
-  ): Promise<Buffer> {
-    const pdf = await this.pdfService.generatePdf(createPdfDto);
-    return pdf;
-  }
+  // @MessagePattern('generate')
+  // async generatePdfNode(
+  //   @Payload() createPdfDto: CreatePdfDto,
+  // ): Promise<Buffer> {
+  //   const pdf = await this.pdfService.generatePdf(createPdfDto);
+  //   return pdf;
+  // }
 
   @Post('subscribe-application')
   async subscribeApplication(@Body() newApplication: SubscribeApplicationDto) {
