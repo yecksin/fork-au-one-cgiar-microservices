@@ -15,4 +15,6 @@ services:
             - .:/usr/src/app
             - /usr/src/app/node_modules
         restart: unless-stopped
+        env_file:
+            - .env
         
