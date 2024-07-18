@@ -13,34 +13,12 @@ export class PdfController {
     private readonly pdfService: PdfService,
   ) {}
 
-  @Post('generate-puppeteer')
-  async generatePdfHttpNodePuppeteer(
-    @Body() createPdfDto: CreatePdfDto,
-    @Res() res: Response,
-  ): Promise<void> {
-    const pdf = await this.pdfService.generatePdfPuppeteer(createPdfDto);
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename=report.pdf',
-      'Content-Length': pdf.length,
-    });
-    res.end(pdf);
-  }
-
-  @MessagePattern('generate-puppeteer')
-  async generatePdfNodePuppeteer(
-    @Payload() createPdfDto: CreatePdfDto,
-  ): Promise<Buffer> {
-    const pdf = await this.pdfService.generatePdfPuppeteer(createPdfDto);
-    return pdf;
-  }
-
-  // @Post('generate')
-  // async generatePdfHttpNode(
+  // @Post('generate-puppeteer')
+  // async generatePdfHttpNodePuppeteer(
   //   @Body() createPdfDto: CreatePdfDto,
   //   @Res() res: Response,
   // ): Promise<void> {
-  //   const pdf = await this.pdfService.generatePdf(createPdfDto);
+  //   const pdf = await this.pdfService.generatePdfPuppeteer(createPdfDto);
   //   res.set({
   //     'Content-Type': 'application/pdf',
   //     'Content-Disposition': 'attachment; filename=report.pdf',
@@ -49,13 +27,35 @@ export class PdfController {
   //   res.end(pdf);
   // }
 
-  // @MessagePattern('generate')
-  // async generatePdfNode(
+  // @MessagePattern('generate-puppeteer')
+  // async generatePdfNodePuppeteer(
   //   @Payload() createPdfDto: CreatePdfDto,
   // ): Promise<Buffer> {
-  //   const pdf = await this.pdfService.generatePdf(createPdfDto);
+  //   const pdf = await this.pdfService.generatePdfPuppeteer(createPdfDto);
   //   return pdf;
   // }
+
+  @Post('generate')
+  async generatePdfHttpNode(
+    @Body() createPdfDto: CreatePdfDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    const pdf = await this.pdfService.generatePdf(createPdfDto);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename=report.pdf',
+      'Content-Length': pdf.length,
+    });
+    res.end(pdf);
+  }
+
+  @MessagePattern('generate')
+  async generatePdfNode(
+    @Payload() createPdfDto: CreatePdfDto,
+  ): Promise<Buffer> {
+    const pdf = await this.pdfService.generatePdf(createPdfDto);
+    return pdf;
+  }
 
   @Post('subscribe-application')
   async subscribeApplication(@Body() newApplication: SubscribeApplicationDto) {

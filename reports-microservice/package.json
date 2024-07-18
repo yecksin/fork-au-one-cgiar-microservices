@@ -32,9 +32,8 @@
     "amqplib": "^0.10.4",
     "aws-lambda": "^1.0.7",
     "dotenv": "^16.4.5",
-    "handlebars": "^4.7.8",
     "jsonwebtoken": "^9.0.2",
-    "puppeteer": "^22.13.1",
+    "pdf-creator-node": "^2.3.5",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
   },
