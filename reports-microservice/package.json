@@ -17,7 +17,14 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "docker:build": "docker build -t reports-microservice .",
+    "docker:run": "docker run --env-file ./.env -dti --name reports-microservice-dev -p 4200:4200 reports-microservice",
+    "docker:stop": "docker stop reports-microservice-dev && docker rm reports-microservice-dev",
+    "docker:logs": "docker logs reports-microservice-dev",
+    "docker:exec": "docker exec -it reports-microservice-dev /bin/bash",
+    "compose:up:dev": "docker-compose up dev -d",
+    "compose:up:prod": "docker-compose up prod -d"
   },
   "dependencies": {
     "@codegenie/serverless-express": "^4.14.1",

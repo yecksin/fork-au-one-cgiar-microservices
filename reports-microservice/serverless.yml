@@ -6,7 +6,10 @@ useDotenv: true
 provider:
   name: aws
   runtime: nodejs20.x
+  memorySize: 1024 # Adjust this based on your needs
+  timeout: 30 # Adjust this based on your needs
   environment:
+    PUPPETEER_CACHE_DIR: /tmp/.cache/puppeteer
     PORT: ${env:PORT}
     RABBITMQ_URL: ${env:RABBITMQ_URL}
     CLARISA_HOST: ${env:CLARISA_HOST}
