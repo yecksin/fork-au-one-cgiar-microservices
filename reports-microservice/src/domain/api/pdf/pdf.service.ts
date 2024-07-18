@@ -5,11 +5,33 @@ import { CreatePdfDto } from './dto/create-pdf.dto';
 import { SubscribeApplicationDto } from './dto/subscribe-application.dto';
 import { ClarisaService } from '../../tools/clarisa/clarisa.service';
 import { ResponseUtils } from '../../utils/response.utils';
+import * as handlebars from 'handlebars';
+import * as puppeteer from 'puppeteer';
 
 @Injectable()
 export class PdfService {
   private readonly _logger = new Logger(PdfService.name);
   constructor(private readonly _clarisaService: ClarisaService) {}
+
+  async generatePdfPuppeteer(createPdfDto: CreatePdfDto): Promise<Buffer> {
+    console.log('🚀 ~ PdfService ~ generatePdf ~ createPdfDto:', createPdfDto);
+    const { data, templateData, options } = createPdfDto;
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    const template = handlebars.compile(templateData);
+    const html = template(data);
+
+    await page.setContent(html);
+    const pdf = await page.pdf(options);
+    console.log('🚀 ~ PdfService ~ generatePdf ~ pdf:', pdf);
+
+    await browser.close();
+    if (!pdf) throw new Error('Error generating pdf');
+
+    console.info('Pdf generated successfully');
+    return pdf;
+  }
 
   async generatePdf(createPdfDto: CreatePdfDto): Promise<Buffer> {
     try {
