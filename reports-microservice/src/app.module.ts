@@ -14,9 +14,10 @@ import { ResponseInterceptor } from './domain/shared/interceptors/response.inter
 import { GlobalExceptions } from './domain/shared/errors/global.exception';
 import { JwtMiddleware } from './domain/shared/middlewares/jwt.middleware';
 import { ClarisaModule } from './domain/tools/clarisa/clarisa.module';
+import { NotificationsModule } from './domain/notifications/notifications.module';
 
 @Module({
-  imports: [PdfModule, RouterModule.register(mainRoutes), ClarisaModule],
+  imports: [PdfModule, RouterModule.register(mainRoutes), ClarisaModule, NotificationsModule],
   controllers: [AppController],
   providers: [
     AppService,
@@ -38,6 +39,10 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(JwtMiddleware).forRoutes({
       path: '/api/reports/pdf/generate',
+      method: RequestMethod.ALL,
+    },
+    {
+      path: '/test-slack-notification',
       method: RequestMethod.ALL,
     });
   }

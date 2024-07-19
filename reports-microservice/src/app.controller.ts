@@ -10,4 +10,9 @@ export class AppController {
   getHello(): ServiceResponseDto<string> {
     return this.appService.getHello();
   }
+
+  @Get('test-slack-notification')
+  slackNotification(): ServiceResponseDto<string> {
+    return this.appService.slackNotification();
+  }
 }

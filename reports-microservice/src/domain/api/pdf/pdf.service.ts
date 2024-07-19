@@ -5,11 +5,15 @@ import { ClarisaService } from '../../tools/clarisa/clarisa.service';
 import { ResponseUtils } from '../../utils/response.utils';
 import { create as createPDF } from 'pdf-creator-node';
 import { ReadStream } from 'fs';
+import { NotificationsService } from '../../notifications/notifications.service';
 
 @Injectable()
 export class PdfService {
   private readonly _logger = new Logger(PdfService.name);
-  constructor(private readonly _clarisaService: ClarisaService) {}
+  constructor(
+    private readonly _clarisaService: ClarisaService,
+    private readonly _notificationsService: NotificationsService,
+  ) {}
 
   async generatePdf(createPdfDto: CreatePdfDto): Promise<Buffer> {
     try {
@@ -29,6 +33,14 @@ export class PdfService {
       return pdfBuffer;
     } catch (error) {
       this._logger.error(`Error generating pdf: ${error}`);
+      this._notificationsService.sendSlackNotification(
+        ':report:',
+        'Reports Microservice - PDF',
+        '#FF0000',
+        'Error notification details',
+        `Error generating pdf: ${error}`,
+        'High',
+      );
       throw new Error(`Error generating pdf ${error}`);
     }
   }
@@ -49,13 +61,21 @@ export class PdfService {
         environment: newApplication.environment,
       });
 
-      ResponseUtils.format({
+      return ResponseUtils.format({
         description: 'Application subscribed successfully',
         data: newApp,
         status: HttpStatus.CREATED,
       });
     } catch (error) {
       this._logger.error(`Error subscribing application: ${error}`);
+      this._notificationsService.sendSlackNotification(
+        ':report:',
+        'Reports Microservice - PDF',
+        '#FF0000',
+        'Error notification details',
+        `Error subscribing application: ${error}`,
+        'High',
+      );
       return ResponseUtils.format({
         description: `Error subscribing application: ${error}`,
         data: null,
