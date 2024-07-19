@@ -7,7 +7,7 @@ import { env } from 'process';
 import { json, urlencoded } from 'express';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
-async function bootstrap() {
+export async function bootstrap() {
   const logger: Logger = new Logger('Bootstrap');
 
   if (env.HTTP_SERVER_AVALIABLE === 'true') {

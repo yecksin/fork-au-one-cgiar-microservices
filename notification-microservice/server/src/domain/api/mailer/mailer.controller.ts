@@ -15,7 +15,10 @@ import { MailerService } from './mailer.service';
 import { SearchRequest } from '../../shared/decorators/search-request.decorator';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { SubscribeApplicationDto } from './dto/ubscribe-application.dto';
-import { ResMisConfigDto } from '../../tools/clarisa/dtos/clarisa-create-conection.dto';
+import {
+  ResClarisaValidateConectioDto,
+  ResMisConfigDto,
+} from '../../tools/clarisa/dtos/clarisa-create-conection.dto';
 import { AuthInterceptor } from '../../shared/Interceptors/microservices.interceptor';
 
 @Controller()
@@ -75,17 +78,20 @@ export class MailerController {
   async sendMail(
     @UploadedFile() file: Express.Multer.File,
     @Body() configMessageDto: ConfigMessageDto,
-    @SearchRequest('application') appConect: ResMisConfigDto,
+    @SearchRequest('application') appConect: ResClarisaValidateConectioDto,
   ) {
     const temp = configMessageDto;
     temp.emailBody = JSON.parse(String(configMessageDto.emailBody));
     temp.from = JSON.parse(String(configMessageDto.from));
-    temp.environment = appConect.environment;
+    temp.environment = appConect.receiver_mis.environment;
+    temp.sender = appConect;
+
     if (file && file?.mimetype === 'text/html') {
       temp.emailBody.message.file = file.buffer;
     } else {
       temp.emailBody.message.file = null;
     }
+
     return this._mailerService.sendMail(temp);
   }
 

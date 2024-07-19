@@ -117,8 +117,7 @@ describe('AuthInterceptor', () => {
     jest
       .spyOn(interceptor['clarisaService'], 'authorization')
       .mockResolvedValue(data);
-
-    await expect(interceptor.intercept(context, next)).rejects.toThrow(
+    expect(interceptor.intercept(context, next)).rejects.toThrow(
       UnauthorizedException,
     );
   });

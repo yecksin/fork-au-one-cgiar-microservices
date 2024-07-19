@@ -34,9 +34,9 @@ export class AuthInterceptor implements NestInterceptor {
         ...payload.data,
         environment: (authData.data as ResClarisaValidateConectioDto)
           .receiver_mis.environment,
+        sender: authData.data,
       },
       auth: payload.auth,
-      application: authData.data,
     };
 
     return next.handle().pipe(map(() => newData));

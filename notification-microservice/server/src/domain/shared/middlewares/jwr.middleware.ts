@@ -41,9 +41,7 @@ export class JwtMiddleware implements NestMiddleware {
     if (!authData.valid) {
       throw new UnauthorizedException('Invalid credentials.');
     }
-    req.application = (
-      authData.data as ResClarisaValidateConectioDto
-    ).receiver_mis;
+    req.application = <ResClarisaValidateConectioDto>authData.data;
     next();
   }
 }

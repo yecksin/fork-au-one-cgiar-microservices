@@ -14,6 +14,7 @@ import Mail from 'nodemailer/lib/mailer';
 import { ClarisaService } from '../../tools/clarisa/clarisa.service';
 import { ServiceResponseDto } from '../../shared/global-dto/service-response.dto';
 import { ENV } from '../../shared/utils/env.utils';
+import { emailStatus } from '../../shared/utils/logger.utils';
 
 @Injectable()
 export class MailerService {
@@ -24,8 +25,6 @@ export class MailerService {
     let options: SMTPTransport.Options = {
       host: env.SERVER_SMTP,
       port: parseInt(env.SERVER_SMTP_PORT),
-      logger: ENV.IS_PRODUCTION,
-      debug: ENV.IS_PRODUCTION,
       logger: !ENV.IS_PRODUCTION,
       debug: !ENV.IS_PRODUCTION,
       secure: false,
@@ -93,15 +92,16 @@ export class MailerService {
         text: text,
         html: htmlBody,
       })
-      .then((res) =>
-        ResponseUtils.format({
+      .then((res) => {
+        emailStatus(this._logger, configMessage.sender, configMessage);
+        return ResponseUtils.format({
           description: 'Email sent successfully',
           data: res,
           status: HttpStatus.CREATED,
-        }),
-      )
+        });
+      })
       .catch((error) => {
-        this._logger.error(error);
+        emailStatus(this._logger, configMessage.sender, configMessage, error);
         return ResponseUtils.format({
           description: 'Error sending email',
           status: HttpStatus.INTERNAL_SERVER_ERROR,

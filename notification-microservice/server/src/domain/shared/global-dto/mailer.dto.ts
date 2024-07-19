@@ -1,5 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AuthorizationDto } from './auth.dto';
+import {
+  ResClarisaValidateConectioDto,
+  ResMisConfigDto,
+} from '../../tools/clarisa/dtos/clarisa-create-conection.dto';
 
 class EmailBodyMessage {
   @ApiProperty()
@@ -37,9 +41,12 @@ export class ConfigMessageDto {
   emailBody: EmailBody;
   @ApiProperty({ required: false })
   environment?: string;
+  @ApiProperty({ required: false })
+  sender?: ResClarisaValidateConectioDto;
 }
 
 export class ConfigMessageSocketDto {
   public auth: AuthorizationDto;
   public data: ConfigMessageDto;
+  public application: ResClarisaValidateConectioDto;
 }

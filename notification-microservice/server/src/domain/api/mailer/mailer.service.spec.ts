@@ -38,6 +38,87 @@ describe('MailerService', () => {
           file: null,
         },
       },
+      sender: {
+        client_id: 'f218c4bf-c9a9-477c',
+        receiver_mis: {
+          acronym: 'SELFTEST',
+          code: 1234,
+          environment: 'TEST',
+          name: 'testing',
+        },
+        sender_mis: {
+          acronym: 'APPTEST',
+          code: 5678,
+          environment: 'TEST',
+          name: 'testing',
+        },
+      },
+    };
+    const spyResData = {
+      accepted: [messageBody.emailBody.to, messageBody.emailBody.cc],
+      rejected: [],
+      ehlo: [
+        'PIPELINING',
+        'SIZE 35000000',
+        'VRFY',
+        'ETRN',
+        'STARTTLS',
+        'ENHANCEDSTATUSCODES',
+        '8BITMIME',
+        'DSN',
+        'CHUNKING',
+      ],
+      envelopeTime: 82,
+      messageTime: 104,
+      messageSize: 6342,
+      response: '250 2.0.0 Ok: queued as 44CDB13ECDC',
+      envelope: {
+        from: messageBody.from.email,
+        to: [messageBody.emailBody.to, messageBody.emailBody.cc],
+      },
+      messageId: '<19ca5e99-a110-c46c-6d16-dd0fb821513d@email.org>',
+    };
+    jest
+      .spyOn(service['transporter'], 'sendMail')
+      .mockResolvedValue(Promise.resolve(spyResData as any));
+    const responde = await service.sendMail(messageBody);
+    expect(responde.status).toBe(HttpStatus.CREATED);
+    expect(responde.description).toBe('Email sent successfully');
+    expect(responde.data).toBe(spyResData);
+  });
+
+  it('should send email - PROD', async () => {
+    process.env.IS_PRODUCTION = 'true';
+    const messageBody: ConfigMessageDto = {
+      from: {
+        email: 'test.domain@email.com',
+        name: 'Test One CGIAR Notification',
+      },
+      emailBody: {
+        subject: 'Prueba HTML REAL no Fake 2',
+        to: 'to.testing@email.com',
+        cc: 'cc.testing@email.com',
+        bcc: null,
+        message: {
+          text: 'string',
+          file: null,
+        },
+      },
+      sender: {
+        client_id: 'f218c4bf-c9a9-477c',
+        receiver_mis: {
+          acronym: 'SELFTEST',
+          code: 1234,
+          environment: 'PROD',
+          name: 'testing',
+        },
+        sender_mis: {
+          acronym: 'APPTEST',
+          code: 5678,
+          environment: 'PROD',
+          name: 'testing',
+        },
+      },
     };
     const spyResData = {
       accepted: [messageBody.emailBody.to, messageBody.emailBody.cc],
@@ -83,6 +164,21 @@ describe('MailerService', () => {
         message: {
           text: 'string',
           file: null,
+        },
+      },
+      sender: {
+        client_id: 'f218c4bf-c9a9-477c',
+        receiver_mis: {
+          acronym: 'SELFTEST',
+          code: 1234,
+          environment: 'TEST',
+          name: 'testing',
+        },
+        sender_mis: {
+          acronym: 'APPTEST',
+          code: 5678,
+          environment: 'TEST',
+          name: 'testing',
         },
       },
     };
@@ -131,6 +227,21 @@ describe('MailerService', () => {
           file: null,
         },
       },
+      sender: {
+        client_id: 'f218c4bf-c9a9-477c',
+        receiver_mis: {
+          acronym: 'SELFTEST',
+          code: 1234,
+          environment: 'TEST',
+          name: 'testing',
+        },
+        sender_mis: {
+          acronym: 'APPTEST',
+          code: 5678,
+          environment: 'TEST',
+          name: 'testing',
+        },
+      },
     };
     const spyResData = {
       accepted: [messageBody.emailBody.to, messageBody.emailBody.cc],
@@ -163,5 +274,35 @@ describe('MailerService', () => {
     expect(responde.status).toBe(HttpStatus.CREATED);
     expect(responde.description).toBe('Email sent successfully');
     expect(responde.data).toBe(spyResData);
+  });
+
+  it('should create conection', async () => {
+    jest
+      .spyOn(service['_clarisaService'], 'createConnection')
+      .mockResolvedValue(
+        Promise.resolve({
+          client_id: 'f218c4bf-c9a9-477c',
+          receiver_mis: {
+            acronym: 'SELFTEST',
+            code: 1234,
+            environment: 'TEST',
+            name: 'testing',
+          },
+          sender_mis: {
+            acronym: 'APPTEST',
+            code: 5678,
+            environment: 'TEST',
+            name: 'testing',
+          },
+          secret: '477c{85dsadf#3e2d55./120283d',
+        }),
+      );
+
+    const responde = await service.subscribeApplication({
+      acronym: 'APPTEST',
+      environment: 'TEST',
+    });
+    expect(responde.data.client_id).toBe('f218c4bf-c9a9-477c');
+    expect(responde.data.secret).toBe('477c{85dsadf#3e2d55./120283d');
   });
 });
