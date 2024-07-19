@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { env } from 'process';
+import { ResponseUtils } from '../utils/response.utils';
 
 @Injectable()
 export class NotificationsService {
   private slackWebhookUrl: string;
+  private readonly _logger = new Logger(NotificationsService.name);
 
   constructor() {
     this.slackWebhookUrl = env.SLACK_WEBHOOK_URL;
@@ -52,9 +54,13 @@ export class NotificationsService {
         ],
       });
 
-      console.log('Notification sent successfully:', response.data);
+      return ResponseUtils.format({
+        description: 'Notification sent successfully',
+        status: HttpStatus.OK,
+        data: response?.data,
+      });
     } catch (error) {
-      console.error('Error sending notification:', error);
+      this._logger.error(`Error sending slack notification: ${error}`);
     }
   }
 }
