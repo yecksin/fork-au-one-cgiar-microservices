@@ -21,7 +21,7 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  const port: number = parseInt(env.PORT);
+  const port: number = 3000;
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
