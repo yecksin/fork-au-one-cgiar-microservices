@@ -1,10 +1,5 @@
-import {
-  BadRequestException,
-  HttpStatus,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
-import { Transporter, createTransport } from 'nodemailer';
+import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import { Transporter } from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { env } from 'process';
 import { ConfigMessageDto } from '../../shared/global-dto/mailer.dto';
@@ -13,37 +8,18 @@ import { ResponseUtils } from '../../shared/utils/response.utils';
 import Mail from 'nodemailer/lib/mailer';
 import { ClarisaService } from '../../tools/clarisa/clarisa.service';
 import { ServiceResponseDto } from '../../shared/global-dto/service-response.dto';
-import { ENV } from '../../shared/utils/env.utils';
-import { emailStatus } from '../../shared/utils/logger.utils';
+import { CustomLogger } from '../../shared/utils/logger.utils';
+import { mailerConnection } from '../../tools/mailer/mailer.connection';
 
 @Injectable()
 export class MailerService {
   private readonly juice = require('juice');
-  private readonly _logger = new Logger(MailerService.name);
   private transporter: Transporter<SMTPTransport.SentMessageInfo>;
-  constructor(private readonly _clarisaService: ClarisaService) {
-    let options: SMTPTransport.Options = {
-      host: env.SERVER_SMTP,
-      port: parseInt(env.SERVER_SMTP_PORT),
-      logger: !ENV.IS_PRODUCTION,
-      debug: !ENV.IS_PRODUCTION,
-      secure: false,
-      ignoreTLS: true,
-      tls: {
-        rejectUnauthorized: false,
-      },
-    };
-
-    if (ENV.IS_PRODUCTION) {
-      options = {
-        ...options,
-        auth: {
-          user: env.SERVER_SMTP_USERNAME,
-          pass: env.SERVER_SMTP_PASSWORD,
-        },
-      };
-    }
-    this.transporter = createTransport(options);
+  constructor(
+    private readonly _clarisaService: ClarisaService,
+    private readonly customLogger: CustomLogger,
+  ) {
+    this.transporter = mailerConnection();
   }
 
   private _getEnv(environment: string): string {
@@ -93,7 +69,7 @@ export class MailerService {
         html: htmlBody,
       })
       .then((res) => {
-        emailStatus(this._logger, configMessage.sender, configMessage);
+        this.customLogger.emailStatus(configMessage.sender, configMessage);
         return ResponseUtils.format({
           description: 'Email sent successfully',
           data: res,
@@ -101,7 +77,11 @@ export class MailerService {
         });
       })
       .catch((error) => {
-        emailStatus(this._logger, configMessage.sender, configMessage, error);
+        this.customLogger.emailStatus(
+          configMessage.sender,
+          configMessage,
+          error,
+        );
         return ResponseUtils.format({
           description: 'Error sending email',
           status: HttpStatus.INTERNAL_SERVER_ERROR,

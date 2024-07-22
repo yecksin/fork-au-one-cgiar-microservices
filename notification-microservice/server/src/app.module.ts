@@ -14,11 +14,13 @@ import { LoggingInterceptor } from './domain/shared/Interceptors/logging.interce
 import { JwtMiddleware } from './domain/shared/middlewares/jwr.middleware';
 import { routes as mainRoutes } from './domain/routes/main.routes';
 import { ClarisaModule } from './domain/tools/clarisa/clarisa.module';
+import { SlackService } from './domain/tools/slack/slack.service';
 @Module({
   imports: [MailerModule, RouterModule.register(mainRoutes), ClarisaModule],
   controllers: [AppController],
   providers: [
     AppService,
+    SlackService,
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,

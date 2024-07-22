@@ -7,10 +7,14 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ServerResponseDto } from '../global-dto/server-response.dto';
+import { SlackService } from '../../tools/slack/slack.service';
+import { SlackChannelsEnum } from '../../tools/slack/enum/channels.enum';
+import { StatusColorEnum } from '../../tools/slack/enum/status-color.enum';
 
 @Catch()
 export class GlobalExceptions implements ExceptionFilter {
   private readonly _logger: Logger = new Logger('System');
+  constructor(private readonly _slackService: SlackService) {}
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
@@ -29,7 +33,17 @@ export class GlobalExceptions implements ExceptionFilter {
     };
 
     this._logger.error((exception as InternalServerErrorException)?.stack);
-
+    this._slackService.sendSlackNotification(
+      SlackChannelsEnum.MICROSERVICES_NOTIFICATIONS,
+      {
+        color: StatusColorEnum.ERROR,
+        emoji: ':email:',
+        text: 'Email service',
+        title: 'Error notification details',
+        info: `An error occurred while sending. "${error}"`,
+        priority: 'High',
+      },
+    );
     response.status(status).json(res);
   }
 }

@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Headers,
+  HttpStatus,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -15,15 +17,18 @@ import { MailerService } from './mailer.service';
 import { SearchRequest } from '../../shared/decorators/search-request.decorator';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { SubscribeApplicationDto } from './dto/ubscribe-application.dto';
-import {
-  ResClarisaValidateConectioDto,
-  ResMisConfigDto,
-} from '../../tools/clarisa/dtos/clarisa-create-conection.dto';
+import { ResClarisaValidateConectioDto } from '../../tools/clarisa/dtos/clarisa-create-conection.dto';
 import { AuthInterceptor } from '../../shared/Interceptors/microservices.interceptor';
+import { RabbitMQService } from '../../tools/rabbitmq/rabbitmq.service';
+import { AuthorizationDto } from '../../shared/global-dto/auth.dto';
+import { ResponseUtils } from '../../shared/utils/response.utils';
 
 @Controller()
 export class MailerController {
-  constructor(private readonly _mailerService: MailerService) {}
+  constructor(
+    private readonly _mailerService: MailerService,
+    private readonly _rabbitMQService: RabbitMQService,
+  ) {}
 
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -79,20 +84,39 @@ export class MailerController {
     @UploadedFile() file: Express.Multer.File,
     @Body() configMessageDto: ConfigMessageDto,
     @SearchRequest('application') appConect: ResClarisaValidateConectioDto,
+    @Headers('auth') header: string,
   ) {
     const temp = configMessageDto;
     temp.emailBody = JSON.parse(String(configMessageDto.emailBody));
     temp.from = JSON.parse(String(configMessageDto.from));
     temp.environment = appConect.receiver_mis.environment;
     temp.sender = appConect;
+    const tempHeader: AuthorizationDto = JSON.parse(header);
 
     if (file && file?.mimetype === 'text/html') {
-      temp.emailBody.message.file = file.buffer;
+      temp.emailBody.message.socketFile = file;
     } else {
       temp.emailBody.message.file = null;
     }
-
-    return this._mailerService.sendMail(temp);
+    const sendMessage: ConfigMessageSocketDto = {
+      application: appConect,
+      auth: tempHeader,
+      data: temp,
+    };
+    await this._rabbitMQService.sendToQueue<ConfigMessageSocketDto>(
+      'send',
+      sendMessage,
+    );
+    return ResponseUtils.format({
+      description: 'The email is being sent',
+      data: {
+        from: temp.from,
+        subject: temp.emailBody.subject,
+        environment: temp.sender.receiver_mis.environment,
+        sender: temp.sender.sender_mis.acronym,
+      },
+      status: HttpStatus.ACCEPTED,
+    });
   }
 
   @MessagePattern('send')
