@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install app dependencies
-RUN npm i
+RUN npm i --only=production
 
 # Bundle app source
 COPY . .
@@ -18,8 +18,8 @@ COPY . .
 RUN npm run build
 
 # Expose the port on which the app will run
-EXPOSE 3002
+EXPOSE 3001
 
 # Start the server using the production build
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start:prod"]
 
