@@ -48,7 +48,7 @@ export class MailerService {
     let htmlBody = '';
     if (configMessage?.emailBody?.message?.file) {
       htmlBody = this.juice(
-        configMessage.emailBody.message.file.toString('utf8'),
+        Buffer.from(configMessage?.emailBody?.message?.file)?.toString('utf8'),
         {
           inlinePseudoElements: false,
           preserveFontFaces: true,
