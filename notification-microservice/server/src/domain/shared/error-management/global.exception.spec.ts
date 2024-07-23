@@ -5,13 +5,14 @@ import {
   HttpStatus,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { SlackService } from '../../tools/slack/slack.service';
 
 describe('GlobalExceptions', () => {
   let filter: GlobalExceptions;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      providers: [GlobalExceptions],
+      providers: [GlobalExceptions, SlackService],
     }).compile();
 
     filter = module.get<GlobalExceptions>(GlobalExceptions);
