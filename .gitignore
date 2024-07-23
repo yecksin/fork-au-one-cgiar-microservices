@@ -1,2 +1,5 @@
 
 notification-microservice/server/serverless.yml
+notification-microservice/server/.serverless/serverless-state.json
+notification-microservice/server/.serverless/cloudformation-template-update-stack.json
+notification-microservice/server/.serverless/cloudformation-template-create-stack.json
