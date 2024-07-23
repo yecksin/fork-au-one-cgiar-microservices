@@ -22,7 +22,7 @@
     "docker:tag": "docker tag cgiar_app_microservice_notification cgiar_app_microservice_notification:$npm_package_version",
     "docker:test": "docker run --env-file ./.env cgiar_app_microservice_notification npm run test",
     "docker:lint": "docker run --env-file ./.env cgiar_app_microservice_notification npm run lint",
-    "docker:run": "docker run --env-file ./.env -dti --name research_indicators_management_authorization_app -p 3002:3002 cgiar_app_microservice_notification",
+    "docker:run": "docker run --env-file ./.env -dti --name research_indicators_management_authorization_app -p 3001:3001 cgiar_app_microservice_notification",
     "docker:stop": "docker stop cgiar_app_microservice_notification_app && docker rm cgiar_app_microservice_notification",
     "docker:logs": "docker logs cgiar_app_microservice_notification_app",
     "docker:exec": "docker exec -it cgiar_app_microservice_notification_app /bin/bash",

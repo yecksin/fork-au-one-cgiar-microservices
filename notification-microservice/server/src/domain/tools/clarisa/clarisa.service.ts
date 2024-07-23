@@ -34,10 +34,7 @@ export class ClarisaService {
         },
       )
       .then((res) => {
-        console.log('res', res);
-        console.log('res', env.CLARISA_MIS);
         const response = this.formatValid<ResClarisaValidateConectioDto>(res);
-        console.log('response', response);
         if (
           response.data.receiver_mis.acronym !== env.CLARISA_MIS ||
           response.data.receiver_mis.environment !== env.CLARISA_MIS_ENV
@@ -64,7 +61,6 @@ export class ClarisaService {
   }
 
   formatValid<T>(data: ResponseClarisaDtio<T>): ResponseValidateClarisa<T> {
-    console.log('data', data);
     if (data.status >= 200 && data.status < 300) {
       return {
         data: data.response,

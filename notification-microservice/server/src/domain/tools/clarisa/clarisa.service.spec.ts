@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
 import { ClarisaService } from './clarisa.service';
-import { BadRequestException } from '@nestjs/common';
 import { AxiosRequestHeaders } from 'axios';
 
 describe('ClarisaService', () => {
@@ -79,7 +78,6 @@ describe('ClarisaService', () => {
       );
 
       const result = await service.authorization('clientId', 'clientSecret');
-      console.log(result);
       expect(result.valid).toBeTruthy();
     });
   });
