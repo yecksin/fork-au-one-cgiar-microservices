@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install app dependencies
-RUN npm i
+RUN npm i --only=production
 
 # Bundle app source
 COPY . .
