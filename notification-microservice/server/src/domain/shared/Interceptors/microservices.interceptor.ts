@@ -19,7 +19,7 @@ export class AuthInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-    const data = JSON.parse(context.switchToRpc().getData() || '{}');
+    const data = context.switchToRpc().getData();
     const payload: ConfigMessageSocketDto = data;
     const authData = await this.clarisaService.authorization(
       payload?.auth?.username,
@@ -39,6 +39,8 @@ export class AuthInterceptor implements NestInterceptor {
       auth: payload.auth,
     };
 
-    return next.handle().pipe(map(() => newData));
+    Object.assign(data, newData);
+
+    return next.handle();
   }
 }

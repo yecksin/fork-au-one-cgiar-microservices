@@ -25,8 +25,7 @@ export class RabbitMQService {
     });
   }
 
-  async sendToQueue<T>(queue: string, message: T) {
-    const parsedMessage: string = JSON.stringify(message);
-    return this.client.emit(queue, parsedMessage);
+  async emitToPattern<T>(pattern: string, message: T) {
+    return this.client.emit(pattern, message);
   }
 }

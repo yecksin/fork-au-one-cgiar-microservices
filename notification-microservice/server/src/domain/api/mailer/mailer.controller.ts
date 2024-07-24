@@ -103,7 +103,7 @@ export class MailerController {
       auth: tempHeader,
       data: temp,
     };
-    await this._rabbitMQService.sendToQueue<ConfigMessageSocketDto>(
+    this._rabbitMQService.emitToPattern<ConfigMessageSocketDto>(
       'send',
       sendMessage,
     );
@@ -121,15 +121,16 @@ export class MailerController {
 
   @MessagePattern('send')
   @UseInterceptors(AuthInterceptor)
-  async handleIncomingMessage(@Payload() data: string) {
-    const newMessage: ConfigMessageSocketDto = JSON.parse(data);
-    const file = newMessage.data?.emailBody?.message?.socketFile;
+  async handleIncomingMessage(@Payload() payload: ConfigMessageSocketDto) {
+    const file = payload.data?.emailBody?.message?.socketFile;
     if (file && file?.mimetype === 'text/html') {
-      newMessage.data.emailBody.message.file = file.buffer;
+      payload.data.emailBody.message.file = file.buffer;
+    } else if (typeof file === 'string') {
+      payload.data.emailBody.message.file = Buffer.from(file);
     } else {
-      newMessage.data.emailBody.message.file = null;
+      payload.data.emailBody.message.file = null;
     }
-    const message = newMessage.data;
+    const message = payload.data;
     return this._mailerService.sendMail(message);
   }
 
