@@ -55,7 +55,7 @@ export async function bootstrap() {
   await microservice
     .listen()
     .then(() => {
-      logger.debug(`Microservice is already listeing`);
+      logger.debug(`Microservice is already listening`);
     })
     .catch((err) => {
       logger.error(`Microservice present an error`);
