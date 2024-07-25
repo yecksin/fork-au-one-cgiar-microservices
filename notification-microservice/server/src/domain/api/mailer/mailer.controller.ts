@@ -94,7 +94,7 @@ export class MailerController {
     const tempHeader: AuthorizationDto = JSON.parse(header);
 
     if (file && file?.mimetype === 'text/html') {
-      temp.emailBody.message.socketFile = file;
+      temp.emailBody.message.socketFile = file.buffer;
     } else {
       temp.emailBody.message.file = null;
     }
@@ -123,10 +123,10 @@ export class MailerController {
   @UseInterceptors(AuthInterceptor)
   async handleIncomingMessage(@Payload() payload: ConfigMessageSocketDto) {
     const file = payload.data?.emailBody?.message?.socketFile;
-    if (file && file?.mimetype === 'text/html') {
-      payload.data.emailBody.message.file = file.buffer;
-    } else if (typeof file === 'string') {
+    if (typeof file === 'string') {
       payload.data.emailBody.message.file = Buffer.from(file);
+    } else if (file) {
+      payload.data.emailBody.message.file = file;
     } else {
       payload.data.emailBody.message.file = null;
     }

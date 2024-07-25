@@ -6,7 +6,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { ClarisaService } from '../../tools/clarisa/clarisa.service';
 import { ConfigMessageSocketDto } from '../global-dto/mailer.dto';
 import { ResClarisaValidateConectioDto } from '../../tools/clarisa/dtos/clarisa-create-conection.dto';
