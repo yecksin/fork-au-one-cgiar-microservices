@@ -21,6 +21,7 @@ export class NotificationsService {
     priority: string,
   ) {
     try {
+      const isProduction = process.env.IS_PRODUCTION === 'true';
       const response = await axios.post(this.slackWebhookUrl, {
         channel: '#microservices-notifications',
         icon_emoji: emoji,
@@ -39,7 +40,7 @@ export class NotificationsService {
               },
               {
                 title: 'Environment',
-                value: env.IS_PRODUCTION ? 'Production' : 'Development',
+                value: isProduction ? 'Production' : 'Development',
                 short: true,
               },
               {

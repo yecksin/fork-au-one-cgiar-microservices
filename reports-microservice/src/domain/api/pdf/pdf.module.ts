@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { PdfService } from './pdf.service';
 import { PdfController } from './pdf.controller';
-import { RabbitMQService } from '../../tools/rabbitmq/rabbitmq.service';
 import Handlebars, { Exception } from 'handlebars';
 import { ClarisaModule } from '../../tools/clarisa/clarisa.module';
 import { NotificationsModule } from '../../notifications/notifications.module';
 
 @Module({
   controllers: [PdfController],
-  providers: [PdfService, RabbitMQService],
+  providers: [PdfService],
   exports: [PdfService],
   imports: [ClarisaModule, NotificationsModule],
 })

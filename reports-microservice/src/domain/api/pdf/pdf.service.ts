@@ -6,42 +6,70 @@ import { ResponseUtils } from '../../utils/response.utils';
 import { create as createPDF } from 'pdf-creator-node';
 import { ReadStream } from 'fs';
 import { NotificationsService } from '../../notifications/notifications.service';
+import {
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import { env } from 'process';
 
 @Injectable()
 export class PdfService {
   private readonly _logger = new Logger(PdfService.name);
+  private readonly s3Client: S3Client;
+
   constructor(
     private readonly _clarisaService: ClarisaService,
     private readonly _notificationsService: NotificationsService,
-  ) {}
+  ) {
+    this.s3Client = new S3Client({
+      region: env.AWS_REGION,
+      credentials: {
+        accessKeyId: env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+      },
+    });
+  }
 
-  async generatePdf(createPdfDto: CreatePdfDto): Promise<Buffer> {
+  async generatePdf(createPdfDto: CreatePdfDto) {
     try {
-      const { data, templateData, options } = createPdfDto;
+      const { data, templateData, options, fileName, bucketName } =
+        createPdfDto;
+
       const document = {
         html: templateData,
         data: data,
         type: 'stream',
       };
 
+      this._logger.debug('Generating PDF...');
       const pdfStream: ReadStream = await createPDF(document, options);
+      const pdfBuffer = await this.streamToBuffer(pdfStream);
 
-      if (!pdfStream) throw new Error('Error converting pdf to stream');
+      const s3Upload = await this.s3Client.send(
+        new PutObjectCommand({
+          Bucket: bucketName,
+          Key: fileName,
+          Body: pdfBuffer,
+          ContentType: 'application/pdf',
+        }),
+      );
 
-      const pdfBuffer: Buffer = await this.streamToBuffer(pdfStream);
-      console.info('PDF generated successfully');
-      return pdfBuffer;
+      if (s3Upload) {
+        this._logger.debug('PDF generated and uploaded to S3 successfully');
+      }
     } catch (error) {
-      this._logger.error(`Error generating pdf: ${error}`);
-      this._notificationsService.sendSlackNotification(
+      const errorMessage = `Error generating PDF: ${error.message}`;
+      this._logger.error(errorMessage, error.stack);
+      await this._notificationsService.sendSlackNotification(
         ':report:',
         'Reports Microservice - PDF',
         '#FF0000',
-        'Error notification details',
-        `Error generating pdf: ${error}`,
+        'Error generating PDF',
+        errorMessage,
         'High',
       );
-      throw new Error(`Error generating pdf ${error}`);
+      throw new Error(errorMessage);
     }
   }
 
@@ -81,6 +109,27 @@ export class PdfService {
         data: null,
         status: HttpStatus.BAD_REQUEST,
       });
+    }
+  }
+
+  async checkFileExists(
+    bucketName: string,
+    fileName: string,
+  ): Promise<boolean> {
+    try {
+      await this.s3Client.send(
+        new HeadObjectCommand({
+          Bucket: bucketName,
+          Key: fileName,
+        }),
+      );
+      this._logger.debug(`File ${fileName} exists in bucket ${bucketName}`);
+      return true;
+    } catch (error) {
+      if (error.name === 'NotFound') {
+        return false;
+      }
+      throw error;
     }
   }
 }

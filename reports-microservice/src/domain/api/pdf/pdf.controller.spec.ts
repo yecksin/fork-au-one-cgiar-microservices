@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PdfController } from './pdf.controller';
 import { PdfService } from './pdf.service';
-import { RabbitMQService } from '../../tools/rabbitmq/rabbitmq.service';
 import { CreatePdfDto } from './dto/create-pdf.dto';
 import { Response } from 'express';
 import { ClarisaModule } from '../../tools/clarisa/clarisa.module';
@@ -12,18 +11,16 @@ jest.mock('../../tools/rabbitmq/rabbitmq.service');
 describe('PdfController', () => {
   let pdfController: PdfController;
   let pdfService: PdfService;
-  let rabbitMQService: RabbitMQService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PdfController],
-      providers: [PdfService, RabbitMQService],
+      providers: [PdfService],
       imports: [ClarisaModule],
     }).compile();
 
     pdfController = module.get<PdfController>(PdfController);
     pdfService = module.get<PdfService>(PdfService);
-    rabbitMQService = module.get<RabbitMQService>(RabbitMQService);
   });
 
   it('should be defined', () => {

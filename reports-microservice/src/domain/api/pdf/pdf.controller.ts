@@ -3,36 +3,26 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { PdfService } from './pdf.service';
 import { Response } from 'express';
 import { CreatePdfDto } from './dto/create-pdf.dto';
-import { RabbitMQService } from '../../tools/rabbitmq/rabbitmq.service';
 import { SubscribeApplicationDto } from './dto/subscribe-application.dto';
+import { ResponseUtils } from '../../utils/response.utils';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Generate PDF')
 @Controller()
 export class PdfController {
-  constructor(
-    private readonly rabbitMQService: RabbitMQService,
-    private readonly pdfService: PdfService,
-  ) {}
+  constructor(private readonly pdfService: PdfService) {}
 
   @Post('generate')
   async generatePdfHttpNode(
     @Body() createPdfDto: CreatePdfDto,
     @Res() res: Response,
-  ): Promise<void> {
-    const pdf = await this.pdfService.generatePdf(createPdfDto);
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename=report.pdf',
-      'Content-Length': pdf.length,
-    });
-    res.end(pdf);
+  ) {
+    return await this.pdfService.generatePdf(createPdfDto);
   }
 
-  @MessagePattern('generate')
-  async generatePdfNode(
-    @Payload() createPdfDto: CreatePdfDto,
-  ): Promise<Buffer> {
-    const pdf = await this.pdfService.generatePdf(createPdfDto);
-    return pdf;
+  @MessagePattern({ cmd: 'generate' })
+  async generatePdfNode(@Payload() createPdfDto: CreatePdfDto) {
+    return await this.pdfService.generatePdf(createPdfDto);
   }
 
   @Post('subscribe-application')
