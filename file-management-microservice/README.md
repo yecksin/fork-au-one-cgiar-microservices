@@ -152,27 +152,26 @@ For more details, refer to the Swagger documentation.
 
 The microservice uses the following DTOs for file management operations:
 
-
 ```typescript
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreatePdfDto {
-  @ApiProperty({ description: 'The data to be used in the template' })
-  public data: any;
+export class UploadFileDto {
+  @ApiProperty({ description: 'Name of the file' })
+  fileName: string;
 
-  @ApiProperty({
-    description: 'The template data, with handlebars syntax',
-  })
-  public templateData: string;
+  @ApiProperty({ description: 'Name of the S3 bucket' })
+  bucketName: string;
 
-  @ApiProperty({ description: 'The options to be used in the pdf generation' })
-  public options: any;
+  @ApiProperty({ description: 'File to upload' })
+  file: any;
+}
 
-  @ApiProperty({ description: 'The bucket name to store the file' })
-  public bucketName: string;
+export class FileValidationDto {
+  @ApiProperty({ description: 'Name of the S3 bucket' })
+  bucketName: string;
 
-  @ApiProperty({ description: 'The file name to store the file' })
-  public fileName: string;
+  @ApiProperty({ description: 'Key of the file in the S3 bucket' })
+  key: string;
 }
 ```
 

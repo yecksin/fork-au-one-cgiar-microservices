@@ -152,24 +152,6 @@ If authentication fails, the middleware will return an appropriate error respons
     └── 📁test
 ```
 
-### Subscriptions
-
-## RabbitMQ Integration
-
-The microservice uses RabbitMQ for processing PDF generation requests. Ensure RabbitMQ is running and accessible.
-
-### Example Exchange Configuration
-
-Ensure your RabbitMQ configuration matches the following:
-
-### Example Queue Configuration
-
-Ensure your RabbitMQ configuration matches the following:
-
-- Queue name: `pdf_generation`
-- Exchange: `pdf_exchange`
-- Routing key: `pdf_routing_key`
-
 ## Data Transfer Objects (DTOs)
 
 The microservice uses the following DTOs for file management operations:
@@ -199,6 +181,13 @@ export class CreatePdfDto {
 
 These DTOs are used to ensure type safety and provide clear API documentation through Swagger.
 
+
+## RabbitMQ Integration
+
+### Subscriptions
+
+The microservice uses RabbitMQ for processing PDF generation requests. Ensure RabbitMQ is running and accessible.
+
 ## Client Configuration
 
 First, install the necesary package:
@@ -210,6 +199,16 @@ npm install amqp-connection-manager
 ```
 
 To configure a client to send messages to this microservice, you can use the following configuration in a NestJS module:
+
+### Example Queue Configuration
+
+Ensure your RabbitMQ configuration matches the following:
+
+- name: `REPORT_SERVICE`
+- transport: `Trasport.RMQ`
+- urls: `Provide your RabbitMQ URL`
+- queue: `Provide your queue name`
+- queueOptions: `{ durable: true }`
 
 ### Module Configuration
 
