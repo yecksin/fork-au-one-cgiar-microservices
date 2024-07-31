@@ -11,4 +11,6 @@ export class CreatePdfDto {
   public bucketName: string;
   @ApiProperty()
   public fileName: string;
+  @ApiProperty()
+  public user: any;
 }
