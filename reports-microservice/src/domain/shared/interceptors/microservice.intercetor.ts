@@ -29,7 +29,7 @@ export class AuthInterceptor implements NestInterceptor {
     const { credentials } = data;
     const payload: AuthorizationDto = JSON.parse(credentials || '{}');
     this._logger.debug(
-      `A client ${payload.username} is trying to access to the Reports microservice`,
+      `A client ${payload.username} is trying to access to the Reports Microservice`,
     );
 
     const authData = await this._clarisaService.authorization(
@@ -60,7 +60,7 @@ export class AuthInterceptor implements NestInterceptor {
     };
 
     this._logger.log(
-      `The Client ${newData.user.sender.sender_mis.name} in the ${newData.user.sender.sender_mis.environment} environment is authorized to access the microservice`,
+      `The Client ${newData.user.sender.sender_mis.name} in the ${newData.user.sender.sender_mis.environment} environment is authorized to access the Reports Microservice`,
     );
     return next.handle().pipe(map(() => newData));
   }
