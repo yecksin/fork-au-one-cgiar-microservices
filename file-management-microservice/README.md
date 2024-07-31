@@ -1,5 +1,7 @@
 # File Management Microservice
 
+## Description
+
 This microservice provides file management functionalities, including uploading, validating, and deleting files in Amazon S3.
 
 ## Key Features
@@ -110,7 +112,7 @@ If authentication fails, the middleware will return an appropriate error respons
 ## Project Structure
 
 ```
-└── 📁reports-microservice
+└── 📁file-management-microservice
     └── 📁src
         └── app.module.ts
         └── main.ts
@@ -150,26 +152,27 @@ For more details, refer to the Swagger documentation.
 
 The microservice uses the following DTOs for file management operations:
 
+
 ```typescript
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UploadFileDto {
-  @ApiProperty({ description: 'Name of the file' })
-  fileName: string;
+export class CreatePdfDto {
+  @ApiProperty({ description: 'The data to be used in the template' })
+  public data: any;
 
-  @ApiProperty({ description: 'Name of the S3 bucket' })
-  bucketName: string;
+  @ApiProperty({
+    description: 'The template data, with handlebars syntax',
+  })
+  public templateData: string;
 
-  @ApiProperty({ description: 'File to upload' })
-  file: any;
-}
+  @ApiProperty({ description: 'The options to be used in the pdf generation' })
+  public options: any;
 
-export class FileValidationDto {
-  @ApiProperty({ description: 'Name of the S3 bucket' })
-  bucketName: string;
+  @ApiProperty({ description: 'The bucket name to store the file' })
+  public bucketName: string;
 
-  @ApiProperty({ description: 'Key of the file in the S3 bucket' })
-  key: string;
+  @ApiProperty({ description: 'The file name to store the file' })
+  public fileName: string;
 }
 ```
 

@@ -1,16 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePdfDto {
-  @ApiProperty()
+  @ApiProperty({ description: 'The data to be used in the template' })
   public data: any;
-  @ApiProperty()
+
+  @ApiProperty({
+    description: 'The template data, with handlebars syntax',
+  })
   public templateData: string;
-  @ApiProperty()
+
+  @ApiProperty({ description: 'The options to be used in the pdf generation' })
   public options: any;
-  @ApiProperty()
+
+  @ApiProperty({ description: 'The bucket name to store the file' })
   public bucketName: string;
-  @ApiProperty()
+
+  @ApiProperty({ description: 'The file name to store the file' })
   public fileName: string;
-  @ApiProperty()
+
+  @ApiProperty({ description: 'The user that is generating the pdf' })
   public user: any;
 }

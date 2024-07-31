@@ -2,111 +2,266 @@
 
 ## Description
 
-This microservice is designed to generate reports for all CGIAR platforms. It provides a centralized solution for report generation, allowing various applications within the CGIAR ecosystem to utilize its capabilities.
+This microservice is responsible for generating and managing PDF reports using RabbitMQ for messaging and queues. The service also integrates with S3 for storing the generated PDFs.
 
-## Features
+## Key Features
 
-- PDF generation
-- RabbitMQ integration for asynchronous processing
-- RESTful API endpoints
-- Swagger documentation
-- CORS enabled
-- JWT authentication middleware
-
-## Technologies
-
-- NestJS
-- RabbitMQ
-- Swagger
-- Express
+- Generate PDF reports from HTML templates
+- Store generated PDFs in AWS S3
+- Send Slack notifications for successful and failed PDF generation
+- Log all PDF generation requests and responses
+- Monitor and manage PDF generation requests using RabbitMQ
 
 ## Prerequisites
 
-- Node.js
-- npm or yarn
+- Node.js (recommended version: 14.x or higher)
+- npm (usually comes with Node.js)
 - RabbitMQ server
+- AWS account and configured credentials
+- Slack webhook (for notifications)
+- CLARISA service access (for authentication)
 
 ## Installation
 
 1. Clone the repository:
 
-   ```
-   git clone [repository-url]
+   ```bash
+   git clone <repository-url>
    cd reports-microservice
    ```
 
-2. Install dependencies:
+2. Install the dependencies:
 
-   ```
+   ```bash
    npm install
    ```
 
-3. Set up environment variables:
-   Create a `.env` file in the root directory and add the following variables:
-   ```
-    PORT=3000
-    RABBITMQ_URL=''
-    CLARISA_HOST=''
-    CLARISA_MIS=''
-    CLARISA_MIS_ENV=''
-    CLARISA_LOGIN=''
-    CLARISA_PASSWORD=''
-    IS_PRODUCTION=boolean
-    SEE_ALL_LOGS=boolean
-    QUEUE_NAME=''
+3. Set up environment variables. Create a `.env` file in the root of the project with the following content:
+
+   ```env
+   PORT=3000
+   RABBITMQ_URL=''
+   CLARISA_HOST=''
+   CLARISA_MIS=''
+   CLARISA_MIS_ENV=''
+   CLARISA_LOGIN=''
+   CLARISA_PASSWORD=''
+   IS_PRODUCTION=boolean
+   SEE_ALL_LOGS=boolean
+   QUEUE_NAME=''
+   SLACK_WEBHOOK_URL=''
+   AWS_REGION=''
+   AWS_ACCESS_KEY_ID=''
+   AWS_SECRET_ACCESS_KEY=''
    ```
 
-## Running the application
+## Running the Application
 
-### Development mode
+To start the server in development mode:
 
 ```
 npm run start:dev
 ```
 
-### Production mode
+For production build and run:
 
 ```
 npm run build
 npm run start:prod
 ```
 
-## API Documentation
-
-Once the application is running, you can access the Swagger documentation at:
-
-```
-http://localhost:3000/api
-```
-
-## Endpoints
-
-### Generate PDF (HTTP)
-
-- **POST** `/generate`
-- Generates a PDF report based on the provided data
-- Requires authentication
-
-### Subscribe Application
-
-- **POST** `/subscribe-application`
-- Subscribes a new application to use the report generation service
-
-## RabbitMQ Integration
-
-This microservice also listens to RabbitMQ messages for asynchronous report generation:
-
-- **Queue**: `{QUEUE_NAME}reports_queue`
-- **Message Pattern**: `generate`
+The server will start at `http://localhost:3000` (or the port you've configured).
 
 ## Authentication
 
-JWT authentication is required for the `/api/reports/pdf/generate` endpoint. Ensure you include a valid JWT token in the Authorization header of your requests.
+This microservice uses a custom JWT middleware for authentication. Here's an overview of the authentication process:
 
-## Contributing
+1. The client must include an `auth` header in their request. The header should be a JSON string containing `username` and `password`.
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
+2. The middleware parses the `auth` header and uses the CLARISA service to validate the credentials.
 
-## License
+3. If the credentials are valid, the middleware checks if the user is authorized to access the microservice based on the CLARISA_MIS environment variable.
 
-This project is licensed under the [LICENSE NAME] - see the [LICENSE.md](LICENSE.md) file for details.
+4. If authorized, the request proceeds to the appropriate route handler.
+
+Example of the `auth` header:
+
+```
+{
+  "username": "your_username",
+  "password": "your_password"
+}
+```
+
+Note: Ensure that your client encodes this JSON string properly when sending it as a header.
+
+If authentication fails, the middleware will return an appropriate error response and send a notification to Slack.
+
+## Project Structure
+
+```
+└── 📁reports-microservice
+    └── 📁src
+        └── app.module.ts
+        └── 📁domain
+            └── 📁api
+                └── 📁pdf
+                    └── 📁dto
+                        └── create-pdf.dto.ts
+                        └── subscribe-application.dto.ts
+                    └── handlebars-helper.ts
+                    └── pdf.controller.ts
+                    └── pdf.module.ts
+                    └── pdf.service.ts
+            └── 📁notifications
+                └── notifications.module.ts
+                └── notifications.service.ts
+            └── 📁routes
+                └── authorization.routes.ts
+                └── main.routes.ts
+            └── 📁shared
+                └── 📁enum
+                └── 📁errors
+                    └── global.exception.ts
+                └── 📁global-dto
+                    └── auth.dto.ts
+                    └── response-clarisa.dto.ts
+                    └── server-response.dto.ts
+                    └── service-response.dto.ts
+                └── 📁guards
+                    └── auth.guard.ts
+                └── 📁interceptors
+                    └── logging.interceptor.ts
+                    └── microservice.intercetor.ts
+                    └── response.interceptor.ts
+                └── 📁middlewares
+                    └── jwt.middleware.spec.ts
+                    └── jwt.middleware.ts
+            └── 📁tools
+                └── 📁clarisa
+                    └── clarisa.connection.ts
+                    └── clarisa.module.ts
+                    └── clarisa.service.ts
+                    └── 📁dto
+                        └── clarisa-create-conection.dto.ts
+            └── 📁utils
+                └── env.utils.ts
+                └── response.utils.ts
+        └── main.ts
+        └── serverless.ts
+    └── 📁test
+```
+
+### Subscriptions
+
+## RabbitMQ Integration
+
+The microservice uses RabbitMQ for processing PDF generation requests. Ensure RabbitMQ is running and accessible.
+
+### Example Exchange Configuration
+
+Ensure your RabbitMQ configuration matches the following:
+
+### Example Queue Configuration
+
+Ensure your RabbitMQ configuration matches the following:
+
+- Queue name: `pdf_generation`
+- Exchange: `pdf_exchange`
+- Routing key: `pdf_routing_key`
+
+## Data Transfer Objects (DTOs)
+
+The microservice uses the following DTOs for file management operations:
+
+```typescript
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CreatePdfDto {
+  @ApiProperty({ description: 'The data to be used in the template' })
+  public data: any;
+
+  @ApiProperty({
+    description: 'The template data, with handlebars syntax',
+  })
+  public templateData: string;
+
+  @ApiProperty({ description: 'The options to be used in the pdf generation' })
+  public options: any;
+
+  @ApiProperty({ description: 'The bucket name to store the file' })
+  public bucketName: string;
+
+  @ApiProperty({ description: 'The file name to store the file' })
+  public fileName: string;
+}
+```
+
+These DTOs are used to ensure type safety and provide clear API documentation through Swagger.
+
+## Client Configuration
+
+First, install the necesary package:
+
+```bash
+npm install @nestjs/microservices
+npm install amqplib
+npm install amqp-connection-manager
+```
+
+To configure a client to send messages to this microservice, you can use the following configuration in a NestJS module:
+
+### Module Configuration
+
+```typescript
+    ClientsModule.register([
+      {
+        name: 'REPORT_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [env.RABBITMQ_URL],
+          queue: env.REPORT_QUEUE,
+          queueOptions: {
+            durable: true,
+          },
+        },
+      },
+    ]),
+```
+
+### Service Configuration
+
+The service must implement the `OnModuleInit` interface:
+
+```typescript
+export class Service implements OnModuleInit {}
+```
+
+You must initialise the client in the method `onModuleInit`:
+
+```typescript
+  constructor(
+    @Inject('REPORT_SERVICE') private readonly client: ClientProxy,
+  ) {}
+
+  // Use the client to send messages
+  async onModuleInit(): Promise<void> {
+    await this.client.connect();
+  }
+```
+
+The client is now ready to send messages to the microservice. The client can send messages using the `emit` method:
+
+```typescript
+  async sendReport(data: any): Promise<void> {
+    const info = {
+      templateData: report.template_object.template,
+      data: data,
+      options: Number(report.id) === 1 ? optionsReporting : optionsIPSR,
+      fileName,
+      bucketName,
+      credentials: this.authHeader,
+    };
+    this.client.emit({ cmd: 'generate' }, info);
+  }
+```
