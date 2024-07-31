@@ -12,12 +12,15 @@ import { FileManagementModule } from './api/file-management/file-management.modu
 import { ClarisaModule } from './tools/clarisa/clarisa.module';
 import { GlobalExceptions } from './errors/global.exception';
 import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
+import { JwtMiddleware } from './middleware/jwt.middleware';
+import { NotificationsModule } from './api/notifications/notifications.module';
 
 @Module({
   imports: [
     RouterModule.register(MainRoutes),
     FileManagementModule,
     ClarisaModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -35,7 +38,7 @@ import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply().forRoutes({
+    consumer.apply(JwtMiddleware).forRoutes({
       path: '/api/file-management/*',
       method: RequestMethod.ALL,
     });

@@ -101,7 +101,7 @@ export class FileManagementService {
     this._logger.error('Max attempts reached. PDF generation failed.');
     await this._notificationsService.sendSlackNotification(
       ':report:',
-      'File Management Microservice TEST',
+      'File Management Microservice',
       '#FF0000',
       'Error to retrieve PDF',
       'Max attempts reached. PDF generation failed',

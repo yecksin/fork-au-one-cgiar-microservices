@@ -53,10 +53,8 @@ export class FileManagementController {
   @Post('validation')
   async validateFile(
     @Body() fileValidationDto: FileValidationDto,
-    @Res() res: Response,
   ): Promise<ResponseUtils> {
     return await this.fileManagementService.fileValidation(fileValidationDto);
-    
   }
 
   @ApiOperation({ summary: 'Delete a file from S3' })
