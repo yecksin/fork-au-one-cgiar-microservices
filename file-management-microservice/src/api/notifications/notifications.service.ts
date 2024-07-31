@@ -26,7 +26,7 @@ export class NotificationsService {
         channel: '#microservices-notifications',
         icon_emoji: emoji,
         text: text,
-        username: 'Reports Microservice',
+        username: 'File Management Microservice',
         attachments: [
           {
             color: color,
@@ -49,7 +49,7 @@ export class NotificationsService {
                 short: true,
               },
             ],
-            footer: 'Reports Microservice',
+            footer: 'File Management Microservice',
             ts: Math.floor(Date.now() / 1000),
           },
         ],
