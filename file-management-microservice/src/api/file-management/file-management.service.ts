@@ -12,13 +12,17 @@ import {
   FileValidationDto,
 } from './dto/upload-file-managment.dto';
 import { Readable } from 'stream';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class FileManagementService {
+  private readonly interval: number = 3000;
+  private readonly maxAttempts: number = 6;
+
   private readonly _logger = new Logger(FileManagementService.name);
   private s3Client: S3Client;
 
-  constructor() {
+  constructor(private readonly _notificationsService: NotificationsService) {
     this.s3Client = new S3Client({
       region: env.AWS_REGION,
       credentials: {
@@ -28,7 +32,7 @@ export class FileManagementService {
     });
   }
 
-  async uploadFile(uploadFileDto: UploadFileDto): Promise<any> {
+  async uploadFile(uploadFileDto: UploadFileDto): Promise<ResponseUtils> {
     try {
       const { fileName, bucketName, file } = uploadFileDto;
 
@@ -42,51 +46,77 @@ export class FileManagementService {
         new PutObjectCommand(uploadParams),
       );
 
-      return s3Upload;
+      return ResponseUtils.format({
+        data: s3Upload,
+        description: 'File uploaded successfully',
+        status: HttpStatus.CREATED,
+      });
     } catch (error) {
       this._logger.error(`Error generating pdf: ${error}`);
     }
   }
 
-  async fileValidation(fileValidationDto: FileValidationDto): Promise<any> {
-    try {
-      const { bucketName, key } = fileValidationDto;
-
-      if (!bucketName || !key) {
-        this._logger.error('Bucket name and key are required');
-        return ResponseUtils.format({
-          data: null,
-          description: 'Bucket name and key are required',
-          status: HttpStatus.BAD_REQUEST,
-        });
-      }
-
-      const input = {
-        Bucket: bucketName,
-        Key: key,
-      };
-      const command = new GetObjectCommand(input);
-      const { Body } = await this.s3Client.send(command);
-
-      if (!Body) this._logger.error(`File not found: ${key}`);
-
-      if (Body instanceof Readable) {
-        const fileUrl = `https://${bucketName}.s3.amazonaws.com/${key}`;
-        this._logger.log(`File found: streaming the file ${key}`);
-        return ResponseUtils.format({
-          data: fileUrl,
-          description: 'File successfully validated and retrieved as url',
-          status: HttpStatus.CREATED,
-        });
-      }
-    } catch (error) {
-      this._logger.error(`Error streaming the file: ${error}`);
+  async fileValidation(
+    fileValidationDto: FileValidationDto,
+  ): Promise<ResponseUtils> {
+    const { bucketName, key } = fileValidationDto;
+    if (!bucketName || !key) {
+      this._logger.error('Bucket name and key are required');
       return ResponseUtils.format({
         data: null,
-        description: 'File not found',
-        status: HttpStatus.NOT_FOUND,
+        description: 'Bucket name and key are required',
+        status: HttpStatus.BAD_REQUEST,
       });
     }
+    const input = {
+      Bucket: bucketName,
+      Key: key,
+    };
+
+    for (let attempts = 0; attempts < this.maxAttempts; attempts++) {
+      try {
+        const command = new GetObjectCommand(input);
+        const { Body } = await this.s3Client.send(command);
+
+        if (!Body) this._logger.error(`File not found: ${key}`);
+
+        if (Body instanceof Readable) {
+          const fileUrl = `https://${bucketName}.s3.amazonaws.com/${key}`;
+          this._logger.log(`File found: streaming the file ${key}`);
+          return ResponseUtils.format({
+            data: fileUrl,
+            description: 'File successfully validated and retrieved as url',
+            status: HttpStatus.CREATED,
+          });
+        }
+      } catch (error) {
+        this._logger.warn(
+          `Attempt ${attempts + 1} - The PDF was not generated and uploaded: ${error.message}`,
+        );
+        if (attempts < this.maxAttempts - 1) {
+          await this.delay(this.interval);
+        }
+      }
+    }
+    this._logger.error('Max attempts reached. PDF generation failed.');
+    await this._notificationsService.sendSlackNotification(
+      ':report:',
+      'File Management Microservice TEST',
+      '#FF0000',
+      'Error to retrieve PDF',
+      'Max attempts reached. PDF generation failed',
+      'High',
+    );
+    return ResponseUtils.format({
+      data: null,
+      description: 'Max attempts reached. PDF generation failed',
+      errors: 'Max attempts reached. PDF generation failed',
+      status: HttpStatus.CREATED,
+    });
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   async deleteFile(fileValidationDto: FileValidationDto): Promise<void> {

@@ -6,6 +6,7 @@ import {
 } from './dto/upload-file-managment.dto';
 import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { ResponseUtils } from '../../utils/response.utils';
 
 @ApiTags('File Management')
 @Controller()
@@ -53,10 +54,9 @@ export class FileManagementController {
   async validateFile(
     @Body() fileValidationDto: FileValidationDto,
     @Res() res: Response,
-  ): Promise<void> {
-    const result =
-      await this.fileManagementService.fileValidation(fileValidationDto);
-    res.status(result.status).json(result);
+  ): Promise<ResponseUtils> {
+    return await this.fileManagementService.fileValidation(fileValidationDto);
+    
   }
 
   @ApiOperation({ summary: 'Delete a file from S3' })
