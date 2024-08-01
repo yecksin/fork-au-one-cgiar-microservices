@@ -38,9 +38,19 @@ import { NotificationsModule } from './api/notifications/notifications.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtMiddleware).forRoutes({
-      path: '/api/file-management/*',
-      method: RequestMethod.ALL,
-    });
+    consumer.apply(JwtMiddleware).forRoutes(
+      {
+        path: '/api/file-management/validation',
+        method: RequestMethod.ALL,
+      },
+      {
+        path: '/api/file-management/upload',
+        method: RequestMethod.ALL,
+      },
+      {
+        path: '/api/file-management/delete',
+        method: RequestMethod.ALL,
+      },
+    );
   }
 }

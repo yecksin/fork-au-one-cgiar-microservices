@@ -13,6 +13,8 @@ import {
 } from './dto/upload-file-managment.dto';
 import { Readable } from 'stream';
 import { NotificationsService } from '../notifications/notifications.service';
+import { SubscribeApplicationDto } from './dto/subscribe-application.dto';
+import { ClarisaService } from '../../tools/clarisa/clarisa.service';
 
 @Injectable()
 export class FileManagementService {
@@ -22,7 +24,10 @@ export class FileManagementService {
   private readonly _logger = new Logger(FileManagementService.name);
   private s3Client: S3Client;
 
-  constructor(private readonly _notificationsService: NotificationsService) {
+  constructor(
+    private readonly _notificationsService: NotificationsService,
+    private readonly _clarisaService: ClarisaService,
+  ) {
     this.s3Client = new S3Client({
       region: env.AWS_REGION,
       credentials: {
@@ -129,5 +134,35 @@ export class FileManagementService {
       }),
     );
     this._logger.debug(`File ${key} deleted from bucket ${bucketName}`);
+  }
+
+  async subscribeApplication(newApplication: SubscribeApplicationDto) {
+    try {
+      const newApp = await this._clarisaService.createConnection({
+        acronym: newApplication.acronym,
+        environment: newApplication.environment,
+      });
+
+      return ResponseUtils.format({
+        description: 'Application subscribed successfully',
+        data: newApp,
+        status: HttpStatus.CREATED,
+      });
+    } catch (error) {
+      this._logger.error(`Error subscribing application: ${error}`);
+      this._notificationsService.sendSlackNotification(
+        ':report:',
+        'Reports Microservice - PDF',
+        '#FF0000',
+        'Error notification details',
+        `Error subscribing application: ${error}`,
+        'High',
+      );
+      return ResponseUtils.format({
+        description: `Error subscribing application: ${error}`,
+        data: null,
+        status: HttpStatus.BAD_REQUEST,
+      });
+    }
   }
 }

@@ -7,6 +7,7 @@ import {
 import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { ResponseUtils } from '../../utils/response.utils';
+import { SubscribeApplicationDto } from './dto/subscribe-application.dto';
 
 @ApiTags('File Management')
 @Controller()
@@ -67,5 +68,10 @@ export class FileManagementController {
   @Delete('delete')
   async deleteFile(@Body() fileValidationDto: FileValidationDto) {
     return await this.fileManagementService.deleteFile(fileValidationDto);
+  }
+
+  @Post('subscribe-application')
+  async subscribeApplication(@Body() newApplication: SubscribeApplicationDto) {
+    return await this.fileManagementService.subscribeApplication(newApplication);
   }
 }
