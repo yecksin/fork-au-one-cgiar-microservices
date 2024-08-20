@@ -56,8 +56,16 @@ export class PdfService {
       );
 
       if (s3Upload) {
-        this._logger.debug(`PDF file generated: ${fileName} and uploaded to S3 Bucket: ${bucketName} successfully`);
+        this._logger.debug(
+          `PDF file generated: ${fileName} and uploaded to S3 Bucket: ${bucketName} successfully`,
+        );
       }
+
+      return ResponseUtils.format({
+        data: s3Upload,
+        description: 'PDF file generated successfully',
+        status: HttpStatus.CREATED,
+      });
     } catch (error) {
       const errorMessage = `Error generating PDF: ${error.message}`;
       this._logger.error(errorMessage, error.stack);

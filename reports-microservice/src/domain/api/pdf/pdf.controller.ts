@@ -2,18 +2,13 @@ import {
   Body,
   Controller,
   Post,
-  Res,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { PdfService } from './pdf.service';
-import { Response } from 'express';
 import { CreatePdfDto } from './dto/create-pdf.dto';
 import { SubscribeApplicationDto } from './dto/subscribe-application.dto';
-import { ResponseUtils } from '../../utils/response.utils';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '../../shared/guards/auth.guard';
 import { AuthInterceptor } from '../../shared/interceptors/microservice.intercetor';
 
 @ApiTags('Generate PDF')

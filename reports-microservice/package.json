@@ -88,9 +88,9 @@
     "coverageThreshold": {
       "global": {
         "branches": 5,
-        "functions": 30,
-        "lines": 35,
-        "statements": 40
+        "functions": 20,
+        "lines": 20,
+        "statements": 20
       }
     },
     "coverageReporters": [

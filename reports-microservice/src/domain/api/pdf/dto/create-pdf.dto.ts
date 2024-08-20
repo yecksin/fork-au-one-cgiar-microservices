@@ -17,7 +17,4 @@ export class CreatePdfDto {
 
   @ApiProperty({ description: 'The file name to store the file' })
   public fileName: string;
-
-  @ApiProperty({ description: 'The user that is generating the pdf' })
-  public user: any;
 }

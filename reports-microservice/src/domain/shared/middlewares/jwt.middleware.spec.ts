@@ -12,7 +12,7 @@ describe('JwtMiddleware', () => {
 
   beforeEach(() => {
     clarisaService = { authorization: jest.fn() } as any;
-    middleware = new JwtMiddleware(clarisaService as ClarisaService);
+    middleware = new JwtMiddleware(clarisaService);
     mockRequest = {};
     mockResponse = {};
     nextFunction = jest.fn();
