@@ -1,6 +1,5 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
-import { env } from 'process';
 import { ResponseUtils } from '../utils/response.utils';
 
 @Injectable()
@@ -9,7 +8,7 @@ export class NotificationsService {
   private readonly _logger = new Logger(NotificationsService.name);
 
   constructor() {
-    this.slackWebhookUrl = env.SLACK_WEBHOOK_URL;
+    this.slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
   }
 
   async sendSlackNotification(

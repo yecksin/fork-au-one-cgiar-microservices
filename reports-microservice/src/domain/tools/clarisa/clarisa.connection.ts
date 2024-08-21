@@ -1,6 +1,5 @@
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, map } from 'rxjs';
-import { env } from 'process';
 import { BadRequestException } from '@nestjs/common';
 import { decode } from 'jsonwebtoken';
 
@@ -10,7 +9,7 @@ export class Clarisa {
   private token: string;
   private http: HttpService;
   constructor(http: HttpService, config: ClarisaOptions) {
-    this.clarisaHost = env.CLARISA_HOST + 'api/';
+    this.clarisaHost = process.env.CLARISA_HOST + 'api/';
     this.authBody = {
       login: config.login,
       password: config.password,
@@ -21,7 +20,7 @@ export class Clarisa {
   private async getToken(): Promise<string> {
     if (!this.token || !this.validToken(this.token)) {
       this.token = await firstValueFrom(
-        this.http.post(env.CLARISA_HOST + 'auth/login', this.authBody).pipe(
+        this.http.post(process.env.CLARISA_HOST + 'auth/login', this.authBody).pipe(
           map(({ data }) => {
             return data.access_token;
           }),

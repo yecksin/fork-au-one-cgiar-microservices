@@ -4,7 +4,6 @@ import 'dotenv/config';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
-import { env } from 'process';
 import { json, urlencoded } from 'express';
 
 async function bootstrap() {
@@ -21,17 +20,17 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  const port: number = +env.PORT || 3003;
+  const port: number = +process.env.PORT || 3003;
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  const queueName: string = `${env.QUEUE_NAME}reports_queue`;
+  const queueName: string = `${process.env.QUEUE_NAME}reports_queue`;
 
   const microservice =
     await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
       transport: Transport.RMQ,
       options: {
-        urls: [env.RABBITMQ_URL],
+        urls: [process.env.RABBITMQ_URL],
         queue: queueName,
         queueOptions: {
           durable: true,

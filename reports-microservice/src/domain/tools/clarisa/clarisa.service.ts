@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Clarisa } from './clarisa.connection';
 import { HttpService } from '@nestjs/axios';
-import { env } from 'process';
 import {
   ClarisaCreateConenctionDto,
   MisConfigDto,
@@ -14,13 +13,13 @@ import { ResponseClarisaDto } from '../../shared/global-dto/response-clarisa.dto
 export class ClarisaService {
   private connection: Clarisa;
   private readonly misSettings: MisConfigDto = {
-    acronym: env.CLARISA_MIS,
-    environment: env.CLARISA_MIS_ENV,
+    acronym: process.env.CLARISA_MIS,
+    environment: process.env.CLARISA_MIS_ENV,
   };
   constructor(private readonly _http: HttpService) {
     this.connection = new Clarisa(this._http, {
-      login: env.CLARISA_LOGIN,
-      password: env.CLARISA_PASSWORD,
+      login: process.env.CLARISA_LOGIN,
+      password: process.env.CLARISA_PASSWORD,
     });
   }
 
