@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { CreatePdfDto } from './dto/create-pdf.dto';
 import { SubscribeApplicationDto } from './dto/subscribe-application.dto';
 import { ClarisaService } from '../../tools/clarisa/clarisa.service';
@@ -20,12 +21,15 @@ export class PdfService {
   constructor(
     private readonly _clarisaService: ClarisaService,
     private readonly _notificationsService: NotificationsService,
+    private readonly configService: ConfigService,
   ) {
     this.s3Client = new S3Client({
-      region: process.env.AWS_REGION,
+      region: this.configService.get<string>('AWS_REGION'),
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: this.configService.get<string>(
+          'AWS_SECRET_ACCESS_KEY',
+        ),
       },
     });
   }

@@ -1,74 +1,118 @@
-import { ClarisaService } from '../../tools/clarisa/clarisa.service';
-import { UnauthorizedException, BadGatewayException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
+import { BadGatewayException, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ClarisaService } from '../../tools/clarisa/clarisa.service';
 import { JwtMiddleware } from './jwt.middleware';
+import { ResClarisaValidateConectioDto } from '../../tools/clarisa/dto/clarisa-create-conection.dto';
 
 describe('JwtMiddleware', () => {
-  let middleware: JwtMiddleware;
+  let jwtMiddleware: JwtMiddleware;
+  let configService: ConfigService;
   let clarisaService: ClarisaService;
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
-  let nextFunction: NextFunction;
+  let mockNext: NextFunction;
 
   beforeEach(() => {
-    clarisaService = { authorization: jest.fn() } as any;
-    middleware = new JwtMiddleware(clarisaService);
-    mockRequest = {};
-    mockResponse = {};
-    nextFunction = jest.fn();
-  });
+    configService = {
+      get: jest.fn().mockReturnValue('mockOwnerUser'),
+    } as unknown as ConfigService;
 
-  it('should throw UnauthorizedException if auth header is invalid', async () => {
-    mockRequest = {
-      headers: {
-        auth: 'invalid json',
-      },
-    };
+    clarisaService = {
+      authorization: jest.fn(),
+    } as unknown as ClarisaService;
 
-    await expect(
-      middleware.use(mockRequest as any, mockResponse as any, nextFunction),
-    ).rejects.toThrow(UnauthorizedException);
-  });
+    jwtMiddleware = new JwtMiddleware(clarisaService, configService);
 
-  it('should throw BadGatewayException if auth header is missing', async () => {
     mockRequest = {
       headers: {},
     };
-
-    await expect(
-      middleware.use(mockRequest as any, mockResponse as any, nextFunction),
-    ).rejects.toThrow(BadGatewayException);
+    mockResponse = {};
+    mockNext = jest.fn();
   });
 
-  it('should throw UnauthorizedException if credentials are invalid', async () => {
-    mockRequest = {
-      headers: {
-        auth: JSON.stringify({ username: 'test', password: 'test' }),
-      },
-    };
-    (clarisaService.authorization as jest.Mock).mockResolvedValue({
-      valid: false,
+  it('should throw BadGatewayException if auth header is missing', async () => {
+    mockRequest.headers = {};
+
+    await expect(
+      jwtMiddleware.use(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      ),
+    ).rejects.toThrow(BadGatewayException);
+
+    expect(mockNext).not.toHaveBeenCalled();
+  });
+
+  it('should throw UnauthorizedException if auth header is not a valid JSON string', async () => {
+    mockRequest.headers['auth'] = 'invalid_json_string';
+
+    await expect(
+      jwtMiddleware.use(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      ),
+    ).rejects.toThrow(UnauthorizedException);
+
+    expect(mockNext).not.toHaveBeenCalled();
+  });
+
+  it('should throw InvalidCredentialsException if clarisaService.authorization returns no data', async () => {
+    mockRequest.headers['auth'] = JSON.stringify({
+      username: 'user',
+      password: 'pass',
+    });
+    (clarisaService.authorization as jest.Mock).mockResolvedValueOnce({
+      data: null,
     });
 
     await expect(
-      middleware.use(mockRequest as any, mockResponse as any, nextFunction),
+      jwtMiddleware.use(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      ),
     ).rejects.toThrow(UnauthorizedException);
+
+    expect(mockNext).not.toHaveBeenCalled();
   });
 
-  it('should call next function if credentials are valid', async () => {
-    const authData = {
-      valid: true,
-      data: { receiver_mis: 'test_mis' },
-    };
-    mockRequest = {
-      headers: {
-        auth: JSON.stringify({ username: 'test', password: 'test' }),
+  it('should throw UnauthorizedAccessException if the receiver_mis.acronym does not match ownerUser', async () => {
+    mockRequest.headers['auth'] = JSON.stringify({
+      username: 'user',
+      password: 'pass',
+    });
+
+    const mockAuthData: ResClarisaValidateConectioDto = {
+      client_id: 'mockClientId',
+      sender_mis: {
+        acronym: 'senderAcronym',
+        environment: 'development',
+        code: 123,
+        name: 'Sender Name',
+      },
+      receiver_mis: {
+        acronym: 'wrongAcronym',
+        environment: 'development',
+        code: 456,
+        name: 'Receiver Name',
       },
     };
-    (clarisaService.authorization as jest.Mock).mockResolvedValue(authData);
 
-    await middleware.use(mockRequest as any, mockResponse as any, nextFunction);
+    (clarisaService.authorization as jest.Mock).mockResolvedValueOnce(
+      mockAuthData,
+    );
 
-    expect(nextFunction).toHaveBeenCalled();
+    await expect(
+      jwtMiddleware.use(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      ),
+    ).rejects.toThrow(UnauthorizedException);
+
+    expect(mockNext).not.toHaveBeenCalled();
   });
 });

@@ -13,19 +13,29 @@ import { ENV } from '../../utils/env.utils';
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   private readonly _logger: Logger = new Logger('System');
+
+  constructor(private readonly env: ENV) {}
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const ctx = context.switchToHttp();
     const request: Request = ctx.getRequest<Request>();
     const ip = request.socket?.remoteAddress || 'Microservice';
 
-    return next
-      .handle()
-      .pipe(
-        finalize(
-          () =>
-            ENV.SEE_ALL_LOGS &&
-            this._logger.log(`[${request.method}]: ${request.url} - By ${ip}`),
-        ),
-      );
+    try {
+      return next
+        .handle()
+        .pipe(
+          finalize(
+            () =>
+              this.env.SEE_ALL_LOGS &&
+              this._logger.log(
+                `[${request.method}]: ${request.url} - By ${ip}`,
+              ),
+          ),
+        );
+    } catch (error) {
+      this._logger.error(error);
+      throw error;
+    }
   }
 }

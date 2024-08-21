@@ -1,6 +1,6 @@
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { NestFactory } from '@nestjs/core';
-import 'dotenv/config';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
@@ -13,6 +13,8 @@ async function bootstrap() {
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ extended: true, limit: '50mb' }));
 
+  const configService = app.get(ConfigService);
+
   const config = new DocumentBuilder()
     .setTitle('Reports Microservice API')
     .setDescription('Reports Microservice API')
@@ -20,17 +22,17 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  const port: number = +process.env.PORT || 3003;
+  const port: number = +configService.get<number>('PORT') || 3003;
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  const queueName: string = `${process.env.QUEUE_NAME}reports_queue`;
+  const queueName: string = `${configService.get<string>('QUEUE_NAME')}reports_queue`;
 
   const microservice =
     await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
       transport: Transport.RMQ,
       options: {
-        urls: [process.env.RABBITMQ_URL],
+        urls: [configService.get<string>('RABBITMQ_URL')],
         queue: queueName,
         queueOptions: {
           durable: true,

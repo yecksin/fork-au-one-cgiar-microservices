@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
   Logger,
   NestInterceptor,
+  Injectable,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Observable, map } from 'rxjs';
@@ -12,8 +13,12 @@ import { ServiceResponseDto } from '../global-dto/service-response.dto';
 import { ENV } from '../../utils/env.utils';
 import { ServerResponseDto } from '../global-dto/server-response.dto';
 
+@Injectable()
 export class ResponseInterceptor implements NestInterceptor {
   private readonly _logger: Logger = new Logger('System');
+
+  constructor(private readonly env: ENV) {}
+
   intercept(
     context: ExecutionContext,
     next: CallHandler,
@@ -68,8 +73,8 @@ export class ResponseInterceptor implements NestInterceptor {
       this._logger.error(message);
       this._logger.error(error);
     } else if (
-      !ENV.IS_PRODUCTION &&
-      ENV.SEE_ALL_LOGS &&
+      !this.env.IS_PRODUCTION &&
+      this.env.SEE_ALL_LOGS &&
       status >= HttpStatus.OK &&
       status < HttpStatus.AMBIGUOUS
     ) {

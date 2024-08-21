@@ -1,12 +1,21 @@
+import { ConfigService } from '@nestjs/config';
+
 export class ENV {
-  static get IS_PRODUCTION(): boolean {
-    return ENV.validateEnvBoolean(process.env.IS_PRODUCTION);
-  }
-  static get SEE_ALL_LOGS(): boolean {
-    return ENV.validateEnvBoolean(process.env.SEE_ALL_LOGS);
+  constructor(private readonly configService: ConfigService) {}
+
+  get IS_PRODUCTION(): boolean {
+    return this.validateEnvBoolean(
+      this.configService.get<string>('IS_PRODUCTION'),
+    );
   }
 
-  private static validateEnvBoolean(pv: string): boolean {
-    return pv == 'true';
+  get SEE_ALL_LOGS(): boolean {
+    return this.validateEnvBoolean(
+      this.configService.get<string>('SEE_ALL_LOGS'),
+    );
+  }
+
+  private validateEnvBoolean(value: string): boolean {
+    return value === 'true';
   }
 }

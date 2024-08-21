@@ -15,9 +15,19 @@ import { GlobalExceptions } from './domain/shared/errors/global.exception';
 import { JwtMiddleware } from './domain/shared/middlewares/jwt.middleware';
 import { ClarisaModule } from './domain/tools/clarisa/clarisa.module';
 import { NotificationsModule } from './domain/notifications/notifications.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ENV } from './domain/utils/env.utils';
 
 @Module({
-  imports: [PdfModule, RouterModule.register(mainRoutes), ClarisaModule, NotificationsModule],
+  imports: [
+    PdfModule,
+    RouterModule.register(mainRoutes),
+    ClarisaModule,
+    NotificationsModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+  ],
   controllers: [AppController],
   providers: [
     AppService,
@@ -33,17 +43,24 @@ import { NotificationsModule } from './domain/notifications/notifications.module
       provide: APP_FILTER,
       useClass: GlobalExceptions,
     },
+    {
+      provide: ENV,
+      useFactory: (configService: ConfigService) => new ENV(configService),
+      inject: [ConfigService],
+    },
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtMiddleware).forRoutes({
-      path: '/api/reports/pdf/generate',
-      method: RequestMethod.ALL,
-    },
-    {
-      path: '/test-slack-notification',
-      method: RequestMethod.ALL,
-    });
+    consumer.apply(JwtMiddleware).forRoutes(
+      {
+        path: '/api/reports/pdf/generate',
+        method: RequestMethod.ALL,
+      },
+      {
+        path: '/test-slack-notification',
+        method: RequestMethod.ALL,
+      },
+    );
   }
 }

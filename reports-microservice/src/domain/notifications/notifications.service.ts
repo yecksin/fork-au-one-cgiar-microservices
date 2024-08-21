@@ -1,14 +1,18 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { ResponseUtils } from '../utils/response.utils';
 
 @Injectable()
 export class NotificationsService {
-  private slackWebhookUrl: string;
+  private readonly slackWebhookUrl: string;
   private readonly _logger = new Logger(NotificationsService.name);
+  private readonly isProduction: boolean;
 
-  constructor() {
-    this.slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
+  constructor(private readonly configService: ConfigService) {
+    this.slackWebhookUrl = this.configService.get<string>('SLACK_WEBHOOK_URL');
+    this.isProduction =
+      this.configService.get<string>('IS_PRODUCTION') === 'true';
   }
 
   async sendSlackNotification(
@@ -20,7 +24,6 @@ export class NotificationsService {
     priority: string,
   ) {
     try {
-      const isProduction = process.env.IS_PRODUCTION === 'true';
       const response = await axios.post(this.slackWebhookUrl, {
         channel: '#microservices-notifications',
         icon_emoji: emoji,
@@ -39,7 +42,7 @@ export class NotificationsService {
               },
               {
                 title: 'Environment',
-                value: isProduction ? 'Production' : 'Development',
+                value: this.isProduction ? 'Production' : 'Development',
                 short: true,
               },
               {

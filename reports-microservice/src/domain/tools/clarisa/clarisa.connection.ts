@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, map } from 'rxjs';
 import { BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { decode } from 'jsonwebtoken';
 
 export class Clarisa {
@@ -8,23 +9,34 @@ export class Clarisa {
   private authBody: ClarisaOptions;
   private token: string;
   private http: HttpService;
-  constructor(http: HttpService, config: ClarisaOptions) {
-    this.clarisaHost = process.env.CLARISA_HOST + 'api/';
+
+  constructor(
+    http: HttpService,
+    config: ClarisaOptions,
+    private readonly configService: ConfigService,
+  ) {
+    this.clarisaHost = this.configService.get<string>('CLARISA_HOST') + 'api/';
     this.authBody = {
       login: config.login,
       password: config.password,
     };
     this.http = http;
+    this.configService = configService;
   }
 
   private async getToken(): Promise<string> {
     if (!this.token || !this.validToken(this.token)) {
       this.token = await firstValueFrom(
-        this.http.post(process.env.CLARISA_HOST + 'auth/login', this.authBody).pipe(
-          map(({ data }) => {
-            return data.access_token;
-          }),
-        ),
+        this.http
+          .post(
+            this.configService.get<string>('CLARISA_HOST') + 'auth/login',
+            this.authBody,
+          )
+          .pipe(
+            map(({ data }) => {
+              return data.access_token;
+            }),
+          ),
       );
     }
     return this.token;

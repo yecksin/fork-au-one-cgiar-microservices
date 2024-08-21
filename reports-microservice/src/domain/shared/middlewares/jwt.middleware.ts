@@ -8,13 +8,21 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthorizationDto } from '../global-dto/auth.dto';
 import { ClarisaService } from '../../tools/clarisa/clarisa.service';
 import { ResClarisaValidateConectioDto } from '../../tools/clarisa/dto/clarisa-create-conection.dto';
 
 @Injectable()
 export class JwtMiddleware implements NestMiddleware {
-  constructor(private readonly clarisaService: ClarisaService) {}
+  private readonly ownerUser: string;
+
+  constructor(
+    private readonly clarisaService: ClarisaService,
+    private readonly configService: ConfigService,
+  ) {
+    this.ownerUser = this.configService.get<string>('CLARISA_MIS');
+  }
 
   async use(
     @Req() req: RequestWithCustomAttrs,
@@ -42,14 +50,14 @@ export class JwtMiddleware implements NestMiddleware {
     if (!authData.data) {
       throw new UnauthorizedException('Invalid credentials.');
     }
-    const ownerUser = process.env.CLARISA_MIS;
+
     if (
       (authData.data as ResClarisaValidateConectioDto).receiver_mis.acronym !==
-      ownerUser
+      this.ownerUser
     ) {
       throw new UnauthorizedException('Invalid credentials.');
     }
-    
+
     req.application = (
       authData.data as ResClarisaValidateConectioDto
     ).receiver_mis;

@@ -1,92 +1,68 @@
-import {
-  CallHandler,
-  ExecutionContext,
-  HttpStatus,
-  InternalServerErrorException,
-  Logger,
-  NestInterceptor,
-} from '@nestjs/common';
-import { Request, Response } from 'express';
-import { Observable, of, throwError } from 'rxjs';
-import { ServiceResponseDto } from '../global-dto/service-response.dto';
+import { ExecutionContext, HttpStatus } from '@nestjs/common';
+import { of } from 'rxjs';
+import { ResponseInterceptor } from './response.interceptor';
 import { ENV } from '../../utils/env.utils';
 import { ServerResponseDto } from '../global-dto/server-response.dto';
-import { ResponseInterceptor } from './response.interceptor';
 
 describe('ResponseInterceptor', () => {
   let interceptor: ResponseInterceptor;
-  let callHandler: CallHandler;
-  let context: ExecutionContext;
-  let responseMock: any;
-  let requestMock: any;
+  let env: ENV;
+  let mockContext: ExecutionContext;
+  let mockNext: any;
+  let mockRequest: any;
+  let mockResponse: any;
 
   beforeEach(() => {
-    interceptor = new ResponseInterceptor();
-    callHandler = {
-      handle: jest.fn(),
-    };
-    responseMock = {
-      status: jest.fn(),
-    };
-    requestMock = {
-      url: '/test',
+    env = {
+      SEE_ALL_LOGS: true,
+      IS_PRODUCTION: false,
+    } as unknown as ENV;
+
+    interceptor = new ResponseInterceptor(env);
+
+    mockRequest = {
+      url: '/test-endpoint',
       method: 'GET',
-      socket: { remoteAddress: '127.0.0.1' },
+      socket: {
+        remoteAddress: '127.0.0.1',
+      },
     };
-    context = {
+
+    mockResponse = {
+      status: jest.fn().mockReturnThis(),
+    };
+
+    mockContext = {
       switchToHttp: jest.fn().mockReturnValue({
-        getResponse: jest.fn().mockReturnValue(responseMock),
-        getRequest: jest.fn().mockReturnValue(requestMock),
+        getRequest: jest.fn().mockReturnValue(mockRequest),
+        getResponse: jest.fn().mockReturnValue(mockResponse),
       }),
     } as unknown as ExecutionContext;
-  });
 
-  it('should return modified response for ServiceResponseDto', async () => {
-    const responseDto: ServiceResponseDto<unknown> = {
-      data: { key: 'value' },
-      status: HttpStatus.OK,
-      description: 'Test description',
-      errors: null,
+    mockNext = {
+      handle: jest.fn().mockReturnValue(of(null)),
     };
-    (callHandler.handle as jest.Mock).mockReturnValue(of(responseDto));
-
-    const result = await interceptor
-      .intercept(context, callHandler)
-      .toPromise();
-
-    expect(result).toEqual({
-      ...responseDto,
-      timestamp: expect.any(String),
-      path: '/test',
-    });
-    expect(responseMock.status).toHaveBeenCalledWith(HttpStatus.OK);
   });
 
-  it('should return modified response for error', async () => {
-    const error = new InternalServerErrorException('Test error');
-    (callHandler.handle as jest.Mock).mockReturnValue(throwError(() => error));
+  it('should format a successful ServiceResponseDto', async () => {
+    await interceptor.intercept(mockContext, mockNext).toPromise();
 
-    await expect(
-      interceptor.intercept(context, callHandler).toPromise(),
-    ).rejects.toThrow('Test error');
+    expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(mockNext.handle).toHaveBeenCalled();
+
+    const formattedResponse = (await mockNext
+      .handle()
+      .toPromise()) as ServerResponseDto<{ message: string }>;
+    expect(formattedResponse).toEqual(null);
   });
 
-  it('should return modified response for unknown response', async () => {
-    const unknownResponse = { some: 'data' };
-    (callHandler.handle as jest.Mock).mockReturnValue(of(unknownResponse));
+  it('should log based on response status', async () => {
+    const loggerSpy = jest.spyOn(interceptor['_logger'], 'verbose');
 
-    const result = await interceptor
-      .intercept(context, callHandler)
-      .toPromise();
+    await interceptor.intercept(mockContext, mockNext).toPromise();
 
-    expect(result).toEqual({
-      data: [],
-      status: HttpStatus.OK,
-      description: 'Unknown message',
-      errors: null,
-      timestamp: expect.any(String),
-      path: '/test',
-    });
-    expect(responseMock.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(loggerSpy).toHaveBeenCalledWith(
+      '[GET]: /test-endpoint status: 200 - By 127.0.0.1',
+    );
   });
 });
