@@ -73,6 +73,7 @@ export class FileManagementService {
         status: HttpStatus.BAD_REQUEST,
       });
     }
+    this._logger.log(`Validating file ${key} in bucket ${bucketName}`);
     const input = {
       Bucket: bucketName,
       Key: key,
