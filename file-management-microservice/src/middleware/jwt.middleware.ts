@@ -9,7 +9,6 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
-import { env } from 'process';
 import { AuthorizationDto } from '../shared/global-dto/auth.dto';
 import { ClarisaService } from '../tools/clarisa/clarisa.service';
 import { ResClarisaValidateConectioDto } from '../tools/clarisa/dto/clarisa-create-conection.dto';
@@ -76,21 +75,6 @@ export class JwtMiddleware implements NestMiddleware {
       );
       throw new UnauthorizedException('Invalid credentials.');
     }
-    const ownerUser = env.CLARISA_MIS;
-    // if (
-    //   (authData.data as ResClarisaValidateConectioDto).receiver_mis.acronym !==
-    //   ownerUser
-    // ) {
-    //   await this._notificationService.sendSlackNotification(
-    //     ':alert:',
-    //     'File Management Microservice',
-    //     '#FF0000',
-    //     'Invalid credentials',
-    //     'The user is not authorized to access this microservice.',
-    //     'Medium',
-    //   );
-    //   throw new UnauthorizedException('Invalid credentials.');
-    // }
 
     this._logger.log(
       `The Client ${(authData.data as ResClarisaValidateConectioDto).sender_mis.name} in the ${(authData.data as ResClarisaValidateConectioDto).sender_mis.environment} environment is authorized to access the File Management Microservice`,

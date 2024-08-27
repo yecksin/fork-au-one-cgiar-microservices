@@ -1,22 +1,35 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ResponseUtils } from './utils/response.utils';
+import { HttpStatus } from '@nestjs/common';
 
-describe('AppController', () => {
-  let appController: AppController;
+describe('AppService', () => {
+  let service: AppService;
 
   beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [AppController],
+    const module: TestingModule = await Test.createTestingModule({
       providers: [AppService],
     }).compile();
 
-    appController = app.get<AppController>(AppController);
+    service = module.get<AppService>(AppService);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
+  describe('getHello', () => {
+    it('should return a formatted response with a welcome message', () => {
+      const expectedResult = ResponseUtils.format({
+        data: 'Welcome to the File Management Microservice!',
+        description:
+          'The File Management Microservice is running for CGIAR applications.',
+        status: HttpStatus.OK,
+      });
+
+      const result = service.getHello();
+
+      expect(result).toEqual(expectedResult);
     });
   });
 });

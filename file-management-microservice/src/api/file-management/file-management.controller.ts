@@ -1,11 +1,10 @@
-import { Controller, Post, Body, Res, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Delete } from '@nestjs/common';
 import { FileManagementService } from './file-management.service';
 import {
   FileValidationDto,
   UploadFileDto,
 } from './dto/upload-file-managment.dto';
 import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
 import { ResponseUtils } from '../../utils/response.utils';
 import { SubscribeApplicationDto } from './dto/subscribe-application.dto';
 
@@ -72,6 +71,8 @@ export class FileManagementController {
 
   @Post('subscribe-application')
   async subscribeApplication(@Body() newApplication: SubscribeApplicationDto) {
-    return await this.fileManagementService.subscribeApplication(newApplication);
+    return await this.fileManagementService.subscribeApplication(
+      newApplication,
+    );
   }
 }

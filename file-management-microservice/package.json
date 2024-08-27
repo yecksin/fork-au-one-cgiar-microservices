@@ -60,6 +60,29 @@
       "json",
       "ts"
     ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/",
+      "/src/migrations/"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/",
+      "/src/migrations/"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 0,
+        "functions": 1,
+        "lines": 1,
+        "statements": 1
+      }
+    },
+    "coverageReporters": [
+      "text",
+      "cobertura",
+      "lcov"
+    ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
@@ -69,6 +92,9 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    }
   }
 }
