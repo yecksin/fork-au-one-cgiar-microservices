@@ -1,4 +1,4 @@
-import { ServiceResponseDto } from "../shared/global-dto/service-response.dto";
+import { ServiceResponseDto } from '../shared/global-dto/service-response.dto';
 
 export class ResponseUtils {
   static format<T>(res: ServiceResponseDto<T>): ServiceResponseDto<T> {
