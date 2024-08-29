@@ -19,7 +19,7 @@ export const disconnectSocketIO = (client: Socket, io: socketIO.Server) => {
     const rooms = Array.from(client.rooms);
     rooms.forEach(room => {
       client.leave(room);
-      io.to(room).emit('updateUserList', getRoomUsers(io, room));
+      io.to(room).emit('room-users', getRoomUsers(io, room));
     });
   });
 };
@@ -45,18 +45,19 @@ export const configUser = (client: Socket, io: socketIO.Server) => {
 export const joinRoom = (client: Socket, io: socketIO.Server) => {
   client.on('join-room', (roomId: string) => {
     client.join(roomId);
-    io.to(roomId).emit('updateUserList', getRoomUsers(io, roomId));
+    io.to(roomId).emit('room-users', getRoomUsers(io, roomId));
   });
 };
 
 export const leaveRoom = (client: Socket, io: socketIO.Server) => {
   client.on('leave-room', (roomId: string) => {
     client.leave(roomId);
-    io.to(roomId).emit('updateUserList', getRoomUsers(io, roomId));
+    io.to(roomId).emit('room-users', getRoomUsers(io, roomId));
   });
 };
 
 function getRoomUsers(io: socketIO.Server, roomId: string) {
   const room = io.sockets.adapter.rooms.get(roomId);
-  return room ? Array.from(room) : [];
+  const socketsIds = room ? Array.from(room) : [];
+  return userList.getUsersBySocketIds(socketsIds);
 }

@@ -25,7 +25,14 @@ export class UserList {
     const users = this.userList.filter((user: User) => {
       return user.userId ? userIds.includes(user.userId.toString()) : false;
     });
+
     return { socketIds: users.map(user => user.socketId), users };
+  }
+
+  getUsersBySocketIds(socketIds: string | string[]) {
+    return this.userList.filter((user: User) => {
+      return socketIds.includes(user.socketId);
+    });
   }
 
   public getList() {
