@@ -5,7 +5,7 @@ import { User } from '../classes/user';
 
 export const userList = new UserList();
 
-export const connectScoketIO = (client: Socket, io: socketIO.Server) => {
+export const connectScoketIO = (client: Socket) => {
   const user = new User(client.id);
   userList.addUser(user);
 };
@@ -25,16 +25,21 @@ export const disconnectSocketIO = (client: Socket, io: socketIO.Server) => {
 };
 
 export const configUser = (client: Socket, io: socketIO.Server) => {
-  client.on('config-user', (payload: { name: string; userId: number }, callback: Function) => {
-    const { name, userId } = payload;
-    userList.configUser(client.id, name, userId);
-    io.emit('all-connected-users', userList.getList());
-
-    callback({
-      ok: true,
-      message: `user ${payload.name}, configured`
-    });
-  });
+  client.on(
+    'config-user',
+    (
+      payload: { name: string; userId: number },
+      callback: (response: { ok: boolean; message: string }) => void
+    ) => {
+      const { name, userId } = payload;
+      userList.configUser(client.id, name, userId);
+      io.emit('all-connected-users', userList.getList());
+      callback({
+        ok: true,
+        message: `user ${payload.name}, configured`
+      });
+    }
+  );
 };
 
 export const joinRoom = (client: Socket, io: socketIO.Server) => {
@@ -51,7 +56,7 @@ export const leaveRoom = (client: Socket, io: socketIO.Server) => {
   });
 };
 
-function getRoomUsers(io: socketIO.Server, roomId: any) {
+function getRoomUsers(io: socketIO.Server, roomId: string) {
   const room = io.sockets.adapter.rooms.get(roomId);
   return room ? Array.from(room) : [];
 }
