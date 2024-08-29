@@ -10,7 +10,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 export async function bootstrap() {
   const logger: Logger = new Logger('Bootstrap');
 
-  if (env.HTTP_SERVER_AVALIABLE === 'true') {
+  if (env.MS_HTTP_SERVER_AVALIABLE === 'true') {
     const app = await NestFactory.create(AppModule);
     app.enableCors();
     app.use(json({ limit: '50mb' }));
@@ -22,16 +22,18 @@ export async function bootstrap() {
       .setVersion('1.0')
       .addBearerAuth()
       .build();
-
-    const port: number = parseInt(env.PORT);
+    const swaggerPath: string = 'swagger';
+    const port: number = parseInt(env.MS_PORT);
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, document);
+    SwaggerModule.setup(swaggerPath, app, document);
 
     await app
       .listen(port)
       .then(() => {
         logger.debug(`Application is running http://localhost:${port}`);
-        logger.debug(`Documentation is running http://localhost:${port}/api`);
+        logger.debug(
+          `Documentation is running http://localhost:${port}/${swaggerPath}`,
+        );
       })
       .catch((err) => {
         const portValue: number | string = port || '<Not defined>';
@@ -39,13 +41,13 @@ export async function bootstrap() {
         logger.error(err);
       });
   }
-  const queueHost: string = `amqps://${env.MQ_USER}:${env.MQ_PASSWORD}@${env.MQ_HOST}`;
+  const queueHost: string = `amqps://${env.MS_RMQ_USER}:${env.MS_RMQ_PASSWORD}@${env.MS_RMQ_HOST}`;
   const microservice =
     await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
       transport: Transport.RMQ,
       options: {
         urls: [queueHost],
-        queue: env.QUEUE_PATH,
+        queue: env.MS_QUEUE_PATH,
         queueOptions: {
           durable: true,
         },

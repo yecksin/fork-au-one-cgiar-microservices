@@ -1,9 +1,11 @@
+import { env } from 'process';
+
 export class ENV {
   static get IS_PRODUCTION(): boolean {
-    return ENV.validateEnvBoolean(process.env.IS_PRODUCTION);
+    return env.MS_ENVIRONMENT == 'production';
   }
   static get SEE_ALL_LOGS(): boolean {
-    return ENV.validateEnvBoolean(process.env.SEE_ALL_LOGS);
+    return ENV.validateEnvBoolean(env.MS_SEE_ALL_LOGS);
   }
 
   private static validateEnvBoolean(pv: string): boolean {

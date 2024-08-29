@@ -12,12 +12,12 @@ export class RabbitMQService {
   private client: ClientProxy;
 
   constructor() {
-    const queueHost: string = `amqps://${env.MQ_USER}:${env.MQ_PASSWORD}@${env.MQ_HOST}`;
+    const queueHost: string = `amqps://${env.MS_RMQ_USER}:${env.MS_RMQ_PASSWORD}@${env.MS_RMQ_HOST}`;
     this.client = ClientProxyFactory.create({
       transport: Transport.RMQ,
       options: {
         urls: [queueHost],
-        queue: env.QUEUE_PATH,
+        queue: env.MS_QUEUE_PATH,
         queueOptions: {
           durable: true,
         },

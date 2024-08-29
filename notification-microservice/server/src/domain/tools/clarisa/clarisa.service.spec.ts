@@ -35,8 +35,8 @@ describe('ClarisaService', () => {
         of({
           data: {
             receiver_mis: {
-              acronym: process.env.CLARISA_MIS,
-              environment: process.env.CLARISA_MIS_ENV,
+              acronym: process.env.MS_CLARISA_MIS,
+              environment: process.env.MS_CLARISA_MIS_ENV,
             },
           },
           status: 200,
@@ -55,15 +55,15 @@ describe('ClarisaService', () => {
     });
 
     it('should return valid response for correct credentials', async () => {
-      process.env.CLARISA_MIS = 'SELFTEST';
-      process.env.CLARISA_MIS_ENV = 'TEST';
+      process.env.MS_CLARISA_MIS = 'SELFTEST';
+      process.env.MS_CLARISA_MIS_ENV = 'TEST';
       jest.spyOn(httpService, 'post').mockReturnValue(
         of({
           data: {
             response: {
               receiver_mis: {
-                acronym: process.env.CLARISA_MIS,
-                environment: process.env.CLARISA_MIS_ENV,
+                acronym: process.env.MS_CLARISA_MIS,
+                environment: process.env.MS_CLARISA_MIS_ENV,
               },
             },
             status: 200,

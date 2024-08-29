@@ -88,7 +88,7 @@ describe('MailerService', () => {
   });
 
   it('should send email - PROD', async () => {
-    process.env.IS_PRODUCTION = 'true';
+    process.env.MS_ENVIRONMENT = 'production';
     const messageBody: ConfigMessageDto = {
       from: {
         email: 'test.domain@email.com',
@@ -201,7 +201,7 @@ describe('MailerService', () => {
       messageSize: 6342,
       response: '250 2.0.0 Ok: queued as 44CDB13ECDC',
       envelope: {
-        from: env.EMAIL_ROOT,
+        from: env.MS_DEFAULT_EMAIL,
         to: [messageBody.emailBody.to, messageBody.emailBody.cc],
       },
       messageId: '<19ca5e99-a110-c46c-6d16-dd0fb821513d@email.org>',
@@ -262,7 +262,7 @@ describe('MailerService', () => {
       messageSize: 6342,
       response: '250 2.0.0 Ok: queued as 44CDB13ECDC',
       envelope: {
-        from: env.EMAIL_ROOT,
+        from: env.MS_DEFAULT_EMAIL,
         to: [messageBody.emailBody.to, messageBody.emailBody.cc],
       },
       messageId: '<19ca5e99-a110-c46c-6d16-dd0fb821513d@email.org>',

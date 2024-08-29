@@ -49,7 +49,7 @@ npm install
 
 ### Configuration
 
-Configure the necessary environment variables for the microservice to operate, including email server credentials and specific environment variables (e.g., EMAIL_ROOT, etc.).
+Configure the necessary environment variables for the microservice to operate, including email server credentials and specific environment variables (e.g., MS_DEFAULT_EMAIL, etc.).
 
 ### Running
 

@@ -14,13 +14,13 @@ import {
 export class ClarisaService {
   private connection: Clarisa;
   private readonly misSettings: MisConfigDto = {
-    acronym: env.CLARISA_MIS,
-    environment: env.CLARISA_MIS_ENV,
+    acronym: env.MS_CLARISA_MIS,
+    environment: env.MS_CLARISA_MIS_ENV,
   };
   constructor(private readonly _http: HttpService) {
     this.connection = new Clarisa(this._http, {
-      login: env.CLARISA_LOGIN,
-      password: env.CLARISA_PASSWORD,
+      login: env.MS_CLARISA_LOGIN,
+      password: env.MS_CLARISA_PASSWORD,
     });
   }
 
@@ -36,8 +36,8 @@ export class ClarisaService {
       .then((res) => {
         const response = this.formatValid<ResClarisaValidateConectioDto>(res);
         if (
-          response.data.receiver_mis.acronym !== env.CLARISA_MIS ||
-          response.data.receiver_mis.environment !== env.CLARISA_MIS_ENV
+          response.data.receiver_mis.acronym !== env.MS_CLARISA_MIS ||
+          response.data.receiver_mis.environment !== env.MS_CLARISA_MIS_ENV
         ) {
           throw new BadRequestException('Invalid credentials.');
         }

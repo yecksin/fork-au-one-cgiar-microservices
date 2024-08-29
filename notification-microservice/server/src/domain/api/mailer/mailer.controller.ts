@@ -40,7 +40,13 @@ export class MailerController {
           format: 'binary',
           description: 'File to upload',
         },
-        from: { type: 'object' },
+        from: {
+          type: 'object',
+          properties: {
+            email: { type: 'string' },
+            name: { type: 'string', nullable: true },
+          },
+        },
         emailBody: {
           type: 'object',
           properties: {

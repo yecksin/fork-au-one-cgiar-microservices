@@ -5,8 +5,8 @@ import { createTransport } from 'nodemailer';
 
 export const mailerConnection = () => {
   let options: SMTPTransport.Options = {
-    host: env.SERVER_SMTP,
-    port: parseInt(env.SERVER_SMTP_PORT),
+    host: env.MS_SERVER_SMTP,
+    port: parseInt(env.MS_SERVER_SMTP_PORT),
     logger: !ENV.IS_PRODUCTION,
     debug: !ENV.IS_PRODUCTION,
     secure: false,
@@ -20,8 +20,8 @@ export const mailerConnection = () => {
     options = {
       ...options,
       auth: {
-        user: env.SERVER_SMTP_USERNAME,
-        pass: env.SERVER_SMTP_PASSWORD,
+        user: env.MS_SERVER_SMTP_USERNAME,
+        pass: env.MS_SERVER_SMTP_PASSWORD,
       },
     };
   }

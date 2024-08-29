@@ -35,7 +35,8 @@ export class MailerService {
     const emailsTo: string = configMessage?.emailBody?.to;
     const emailsCc: string = configMessage?.emailBody?.cc;
     const emailsBcc: string = configMessage?.emailBody?.bcc;
-    const emailFrom: string = configMessage?.from?.email || `${env.EMAIL_ROOT}`;
+    const emailFrom: string =
+      configMessage?.from?.email || `${env.MS_DEFAULT_EMAIL}`;
     const nameFrom: string = `${configMessage?.from?.name || 'One CGIAR Notification'} No reply`;
     const fromBofy: Mail.Address = {
       name: nameFrom,

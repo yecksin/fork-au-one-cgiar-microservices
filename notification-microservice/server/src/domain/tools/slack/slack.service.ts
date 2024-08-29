@@ -10,7 +10,7 @@ export class SlackService {
   private readonly _logger = new Logger(SlackService.name);
 
   constructor() {
-    this.slackWebhookUrl = env.SLACK_WEBHOOK_URL;
+    this.slackWebhookUrl = env.MS_SLACK_WEBHOOK_URL;
   }
 
   async sendSlackNotification(
@@ -37,7 +37,7 @@ export class SlackService {
               },
               {
                 title: 'Environment',
-                value: env.IS_PRODUCTION ? 'Production' : 'Development',
+                value: env.MS_ENVIRONMENT,
                 short: true,
               },
               {
