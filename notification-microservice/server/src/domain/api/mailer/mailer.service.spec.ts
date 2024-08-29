@@ -29,7 +29,7 @@ describe('MailerService', () => {
         name: 'Test One CGIAR Notification',
       },
       emailBody: {
-        subject: 'Prueba HTML REAL no Fake 2',
+        subject: 'Test email HTML',
         to: 'to.testing@email.com',
         cc: 'cc.testing@email.com',
         bcc: null,
@@ -95,7 +95,7 @@ describe('MailerService', () => {
         name: 'Test One CGIAR Notification',
       },
       emailBody: {
-        subject: 'Prueba HTML REAL no Fake 2',
+        subject: 'Test email HTML',
         to: 'to.testing@email.com',
         cc: 'cc.testing@email.com',
         bcc: null,
