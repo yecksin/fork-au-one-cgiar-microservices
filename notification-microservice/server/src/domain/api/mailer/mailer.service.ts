@@ -10,10 +10,10 @@ import { ClarisaService } from '../../tools/clarisa/clarisa.service';
 import { ServiceResponseDto } from '../../shared/global-dto/service-response.dto';
 import { CustomLogger } from '../../shared/utils/logger.utils';
 import { mailerConnection } from '../../tools/mailer/mailer.connection';
+import * as juice from 'juice';
 
 @Injectable()
 export class MailerService {
-  private readonly juice = require('juice');
   private transporter: Transporter<SMTPTransport.SentMessageInfo>;
   constructor(
     private readonly _clarisaService: ClarisaService,
@@ -48,7 +48,7 @@ export class MailerService {
 
     let htmlBody = '';
     if (configMessage?.emailBody?.message?.file) {
-      htmlBody = this.juice(
+      htmlBody = juice(
         Buffer.from(configMessage?.emailBody?.message?.file)?.toString('utf8'),
         {
           inlinePseudoElements: false,
