@@ -5,11 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
+    "build": "tsc && npm run copy-html",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "tsc-w": "tsc -w",
+    "copy-html": "cp -r public dist/",
     "node-w": "node --watch dist/index.js ",
-    "start": "concurrently \"npm run tsc-w\" \"npm node-w\""
+    "start": "concurrently \"npm run tsc-w\" \"npm run node-w\" \"npm run copy-html\""
   },
   "keywords": [],
   "author": "",

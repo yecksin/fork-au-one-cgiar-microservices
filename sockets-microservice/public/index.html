@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User List</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="./code.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      {{ message }} <br />
+      <br />
+
+      <ul>
+        <!-- Directiva v-for para iterar sobre el array de usuarios -->
+        <li v-for="user in users" :key="user.id">{{ user.name }} (ID: {{ user.id }})</li>
+      </ul>
+    </div>
+
+    <script>
+      const { createApp, ref } = Vue;
+
+      createApp({
+        setup() {
+          const message = ref('Hello vue!');
+          const users = [
+            { id: 1, name: 'Alice' },
+            { id: 2, name: 'Bob' },
+            { id: 3, name: 'Charlie' }
+          ];
+          return {
+            message,
+            users
+          };
+        }
+      }).mount('#app');
+    </script>
+  </body>
+</html>
