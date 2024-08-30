@@ -101,7 +101,7 @@ export const appConfig: ApplicationConfig = {
         setup() {
           const endpoints = ref([
             {
-              name: '/Sockets/alert',
+              name: '/socket/alert',
               method: '',
               description:
                 'This endpoint allows sending a global alert to all users connected to the platform. The alert is emitted in real-time via socket.io, and its content is defined by the request body.',
@@ -116,7 +116,7 @@ export const appConfig: ApplicationConfig = {
                 'This endpoint is ideal for sending urgent or important alerts that need to be seen by all users, regardless of their role or session status.'
             },
             {
-              name: '/Sockets/notification',
+              name: '/socket/notification',
               method: '',
               description:
                 'This endpoint allows sending specific notifications to one or more users connected to the platform. Notifications are sent in real-time using socket.io, and the recipient is determined by the user’s ID.',
@@ -132,7 +132,7 @@ export const appConfig: ApplicationConfig = {
                 'This endpoint is useful for sending personalized notifications to specific users, for example, when a result is submitted, closed, or modified. The flexibility of the notification content allows adaptation to different scenarios.'
             },
             {
-              name: '/Sockets/users',
+              name: '/socket/users',
               method: '',
               description:
                 'This endpoint allows retrieving a list of all users currently connected to the platform. The users are listed in real-time, providing insights into who is active on the platform at any given moment.',
