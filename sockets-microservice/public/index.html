@@ -35,6 +35,61 @@
 
         <p><strong>Usage:</strong> {{ endpoint.usage }}</p>
       </div>
+
+      <!-- Nueva sección para la instalación de Angular -->
+      <div class="installation-section">
+        <h2>Installation Guide for Angular 18 with ngx-socket-io</h2>
+        <p>
+          This section will guide you through the installation of the
+          <code>ngx-socket-io</code> library in an Angular 18 project. This is essential for
+          integrating real-time communication in your application using WebSockets.
+        </p>
+        <h3>Step 1: Install ngx-socket-io</h3>
+        <p>
+          Run the following command in your Angular project to install
+          <code>ngx-socket-io</code>:
+        </p>
+        <pre><code>npm install ngx-socket-io</code></pre>
+
+        <h3>Step 2: Configure the Socket</h3>
+        <p>
+          After installation, you need to configure the SocketIoModule in your Angular application.
+          Below is an example configuration in
+          <code>app.module.ts</code>:
+        </p>
+        <pre><code>
+import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
+import { provideRouter, withViewTransitions } from '@angular/router';
+
+import { routes } from './app.routes';
+import { provideHttpClient } from '@angular/common/http';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
+
+const config: SocketIoConfig = { url: 'http://localhost:3005', options: {} };
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes, withViewTransitions()),
+    provideHttpClient(),
+    importProvidersFrom(BrowserAnimationsModule, SocketIoModule.forRoot(config))
+  ]
+};
+        </code></pre>
+
+        <h3>Step 3: Refer to the WebSocket Service</h3>
+        <p>
+          You can refer to the following
+          <a
+            href="https://github.com/AllianceBioversityCIAT/alliance-research-indicators-main/blob/dev-cognito-front/client/research-indicators/src/app/shared/sockets/websocket.service.ts"
+            target="_blank"
+            >GitHub file</a
+          >
+          for the complete implementation of the WebSocket service that handles the communication
+          logic.
+        </p>
+      </div>
     </div>
 
     <script src="./code.js"></script>
