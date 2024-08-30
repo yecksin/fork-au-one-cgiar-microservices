@@ -3,35 +3,95 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User List</title>
+    <title>Endpoint Documentation</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="./code.js"></script>
+    <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div id="app">
-      {{ message }} <br />
-      <br />
+    <div id="app" class="container">
+      <h1>Version 1.0</h1>
+      <h2>Endpoint Documentation - /Sockets</h2>
 
-      <ul>
-        <!-- Directiva v-for para iterar sobre el array de usuarios -->
-        <li v-for="user in users" :key="user.id">{{ user.name }} (ID: {{ user.id }})</li>
-      </ul>
+      <p class="intro">
+        Below is the documentation for the developed endpoints under the base route
+        <code>/Sockets</code>. This information will be used to generate an HTML that presents the
+        details in a visually appealing manner.
+      </p>
+
+      <div v-for="endpoint in endpoints" :key="endpoint.name" class="endpoint">
+        <h3 class="endpoint-title">{{ endpoint.name }}</h3>
+        <p><strong>Method:</strong> {{ endpoint.method }}</p>
+        <p><strong>Description:</strong> {{ endpoint.description }}</p>
+
+        <p><strong>Parameters:</strong></p>
+        <ul class="parameters-list">
+          <li v-for="param in endpoint.parameters" :key="param">{{ param }}</li>
+        </ul>
+
+        <p><strong>Response:</strong></p>
+        <ul class="response-list">
+          <li v-for="response in endpoint.response" :key="response">{{ response }}</li>
+        </ul>
+
+        <p><strong>Usage:</strong> {{ endpoint.usage }}</p>
+      </div>
     </div>
+
+    <script src="./code.js"></script>
 
     <script>
       const { createApp, ref } = Vue;
 
       createApp({
         setup() {
-          const message = ref('Hello vue!');
-          const users = [
-            { id: 1, name: 'Alice' },
-            { id: 2, name: 'Bob' },
-            { id: 3, name: 'Charlie' }
-          ];
+          const endpoints = ref([
+            {
+              name: '/Sockets/alert',
+              method: '',
+              description:
+                'This endpoint allows sending a global alert to all users connected to the platform. The alert is emitted in real-time via socket.io, and its content is defined by the request body.',
+              parameters: [
+                'body (object): Contains the information that will be sent as an alert. The content is dynamic and can vary depending on the developer’s logic.'
+              ],
+              response: [
+                'ok (boolean): Indicates if the operation was successful.',
+                'body (object): Returns the same object sent in the request for confirmation.'
+              ],
+              usage:
+                'This endpoint is ideal for sending urgent or important alerts that need to be seen by all users, regardless of their role or session status.'
+            },
+            {
+              name: '/Sockets/notification',
+              method: '',
+              description:
+                'This endpoint allows sending specific notifications to one or more users connected to the platform. Notifications are sent in real-time using socket.io, and the recipient is determined by the user’s ID.',
+              parameters: [
+                'userIds (array of numbers): Contains the IDs of the users to whom the notification will be sent.',
+                'notification (object): Contains the notification information. The content of this object is dynamic and can vary depending on the developer’s logic.'
+              ],
+              response: [
+                'ok (boolean): Indicates if the operation was successful.',
+                'notification (object): Returns the same object sent in the request for confirmation.'
+              ],
+              usage:
+                'This endpoint is useful for sending personalized notifications to specific users, for example, when a result is submitted, closed, or modified. The flexibility of the notification content allows adaptation to different scenarios.'
+            },
+            {
+              name: '/Sockets/users',
+              method: '',
+              description:
+                'This endpoint allows retrieving a list of all users currently connected to the platform. The users are listed in real-time, providing insights into who is active on the platform at any given moment.',
+              parameters: ['No parameters required.'],
+              response: [
+                'users (array of objects): Returns an array with details of each connected user, including their ID and name.'
+              ],
+              usage:
+                'This endpoint is useful for obtaining a real-time overview of connected users, which can be essential for decision-making, such as performing deployments or monitoring platform activity.'
+            }
+          ]);
+
           return {
-            message,
-            users
+            endpoints
           };
         }
       }).mount('#app');
