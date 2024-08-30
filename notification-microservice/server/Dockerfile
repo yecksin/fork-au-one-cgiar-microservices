@@ -23,7 +23,7 @@ COPY . .
 RUN npm run build
 
 # Expose the port on which the app will run
-EXPOSE 3001
+EXPOSE 3004
 
 # Start the server using the production build
 CMD ["npm", "run", "start"]
@@ -49,7 +49,7 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package*.json ./
 
 # Expose the port on which the app will run
-EXPOSE 3001
+EXPOSE 3004
 
 # Start the server using the production build
 CMD ["node", "dist/main.js"]
