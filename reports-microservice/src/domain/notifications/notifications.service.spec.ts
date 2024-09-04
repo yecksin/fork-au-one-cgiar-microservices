@@ -53,7 +53,7 @@ describe('NotificationsService', () => {
               },
               {
                 title: 'Environment',
-                value: 'Development',
+                value: 'Development :construction:',
                 short: true,
               },
               {
@@ -108,7 +108,7 @@ describe('NotificationsService', () => {
               },
               {
                 title: 'Environment',
-                value: 'Development',
+                value: 'Development :construction:',
                 short: true,
               },
               {
