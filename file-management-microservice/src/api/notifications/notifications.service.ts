@@ -40,7 +40,7 @@ export class NotificationsService {
               },
               {
                 title: 'Environment',
-                value: isProduction ? 'Production' : 'Development',
+                value: isProduction ? 'Production' : 'Development :construction:',
                 short: true,
               },
               {

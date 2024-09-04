@@ -39,6 +39,18 @@ export class PdfService {
       const { data, templateData, options, fileName, bucketName } =
         createPdfDto;
 
+      if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+        const errorMessage = `The "data" field must be a valid JSON object in ${fileName}.`;
+        this._logger.error(errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      if (typeof templateData !== 'string') {
+        const errorMessage = `The "HTML Template" field must be a string or template string in ${fileName}.`;
+        this._logger.error(errorMessage);
+        throw new Error(errorMessage);
+      }
+
       const document = {
         html: templateData,
         data: data,

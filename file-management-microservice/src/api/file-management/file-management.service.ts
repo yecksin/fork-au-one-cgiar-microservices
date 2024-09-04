@@ -110,13 +110,13 @@ export class FileManagementService {
       'File Management Microservice',
       '#FF0000',
       'Error to retrieve PDF',
-      'Max attempts reached. PDF generation failed',
+      `Max attempts reached. PDF generation failed for s3://${bucketName}/${key}`,
       'High',
     );
     return ResponseUtils.format({
       data: null,
       description: 'Max attempts reached. PDF generation failed',
-      errors: 'Max attempts reached. PDF generation failed',
+      errors: `Max attempts reached. PDF generation failed for s3://${bucketName}/${key}`,
       status: HttpStatus.CREATED,
     });
   }
