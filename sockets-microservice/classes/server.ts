@@ -21,7 +21,7 @@ export default class Server {
     this.httpServer = new http.Server(this.app);
     this.io = new socketIO.Server(this.httpServer, {
       cors: {
-        origin: 'http://localhost:4200',
+        origin: '*',
         methods: ['GET', 'POST']
       }
     });
