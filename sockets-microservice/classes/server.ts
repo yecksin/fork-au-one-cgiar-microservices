@@ -35,7 +35,7 @@ export default class Server {
 
   private listenSockets() {
     this.io.on('connection', client => {
-      socket.connectScoketIO(client);
+      socket.connectSocketIO(client);
 
       socket.configUser(client, this.io);
 

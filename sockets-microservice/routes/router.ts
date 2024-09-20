@@ -17,10 +17,10 @@ router.post('/alert', (req: Request, res: Response) => {
 });
 
 router.post('/notification', (req: Request, res: Response) => {
-  const { userIds, notification } = req.body;
+  const { userIds, notification, platform } = req.body;
 
   const server = Server.instance;
-  const { socketIds, users } = userList.getSocketIdsByUserIds(userIds);
+  const { socketIds, users } = userList.getSocketIdsByUserIds(userIds, platform);
 
   server.io.in(socketIds).emit('notifications', notification);
 
@@ -34,7 +34,15 @@ router.post('/notification', (req: Request, res: Response) => {
 router.get('/users', (req: Request, res: Response) => {
   res.json({
     ok: true,
-    clients: userList.getList()
+    clients: userList.getAllUsers()
+  });
+});
+
+router.get('/users/:platform', (req: Request, res: Response) => {
+  const platform = req.params.platform;
+  res.json({
+    ok: true,
+    clients: userList.getListByPlatform(platform)
   });
 });
 

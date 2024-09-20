@@ -8,35 +8,43 @@ export class UserList {
     return user;
   }
 
-  public configUser(socketId: string, name: string, userId: number) {
-    for (const user of this.userList) {
-      if (user.socketId === socketId) {
-        user.name = name;
-        user.userId = userId;
-        break;
-      }
+  public configUser(socketId: string, name?: string, userId?: number, platform?: string) {
+    const user = this.userList.find(user => user.socketId === socketId);
+    if (user) {
+      if (name !== undefined) user.name = name;
+      if (userId !== undefined) user.userId = userId;
+      if (platform !== undefined) user.platform = platform;
     }
   }
 
-  public getSocketIdsByUserIds(userIds: string | string[]): {
+  public getSocketIdsByUserIds(
+    userIds: string | string[],
+    platform: string
+  ): {
     socketIds: string | string[];
     users: User[];
   } {
     const users = this.userList.filter((user: User) => {
-      return user.userId ? userIds.includes(user.userId.toString()) : false;
+      return user.userId && user.platform === platform
+        ? userIds.includes(user.userId.toString())
+        : false;
     });
 
     return { socketIds: users.map(user => user.socketId), users };
   }
 
-  getUsersBySocketIds(socketIds: string | string[]) {
+  getUsersBySocketIds(socketIds: string | string[], platform: string) {
     return this.userList.filter((user: User) => {
-      return socketIds.includes(user.socketId);
+      return socketIds.includes(user.socketId) && user.platform === platform;
     });
   }
 
-  public getList() {
-    return this.userList.filter(user => user.name !== 'nameless');
+  public getListByPlatform(platform: string) {
+    return this.userList.filter(user => user.name !== 'nameless' && user.platform === platform);
+  }
+
+  public getAllUsers() {
+    return this.userList;
   }
 
   public getUser(socketId: string) {
