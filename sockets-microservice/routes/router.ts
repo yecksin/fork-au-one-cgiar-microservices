@@ -5,14 +5,14 @@ import { userList } from '../sockets/socket';
 const router = Router();
 
 router.post('/alert', (req: Request, res: Response) => {
-  const { body } = req;
+  const { platform } = req.body;
 
   const server = Server.instance;
-  server.io.emit('alert', body);
+  server.io.emit(`alert-${platform}`, req.body);
 
   res.json({
     ok: true,
-    body
+    body: req.body
   });
 });
 
@@ -22,13 +22,19 @@ router.post('/notification', (req: Request, res: Response) => {
   const server = Server.instance;
   const { socketIds, users } = userList.getSocketIdsByUserIds(userIds, platform);
 
-  server.io.in(socketIds).emit('notifications', notification);
-
-  res.json({
-    ok: true,
-    notification,
-    senders: users
-  });
+  if (socketIds?.length) {
+    server.io.in(socketIds).emit('notifications', notification);
+    res.json({
+      ok: true,
+      notification,
+      senders: users
+    });
+  } else {
+    res.status(404).json({
+      ok: false,
+      message: 'No active sockets found for the given user IDs'
+    });
+  }
 });
 
 router.get('/users', (req: Request, res: Response) => {
