@@ -1,0 +1,81 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  
+  workflow_dispatch:  
+
+jobs:
+  sync-fork:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Checkout fork repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main-sockets  # Inicialmente, sincronizar la rama main-sockets
+          fetch-depth: 0
+
+      - name: Add upstream remote
+        run: git remote add upstream https://github.com/AllianceBioversityCIAT/one-cgiar-microservices.git
+
+      - name: Fetch upstream changes (main-sockets)
+        run: git fetch upstream main-sockets
+
+      - name: Check for differences between fork and upstream (main-sockets)
+        id: check_diff_main
+        run: |
+          git fetch origin main-sockets
+          DIFF_MAIN=$(git diff --name-only origin/main-sockets upstream/main-sockets)
+          if [ -z "$DIFF_MAIN" ]; then
+            echo "No changes found for main-sockets"
+            echo "::set-output name=changes_main::false"
+          else
+            echo "Changes found for main-sockets"
+            echo "::set-output name=changes_main::true"
+          fi
+
+      - name: Sync main-sockets branch if differences found
+        if: steps.check_diff_main.outputs.changes_main == 'true' 
+        run: |
+          git merge upstream/main-sockets || git merge --abort
+          git push origin main-sockets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout dev-sockets branch
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: dev-sockets  # Ahora sincronizamos la rama dev-sockets
+          fetch-depth: 0
+
+      - name: Fetch upstream changes (dev-sockets)
+        run: git fetch upstream dev-sockets
+
+      - name: Check for differences between fork and upstream (dev-sockets)
+        id: check_diff_dev
+        run: |
+          git fetch origin dev-sockets
+          DIFF_DEV=$(git diff --name-only origin/dev-sockets upstream/dev-sockets)
+          if [ -z "$DIFF_DEV" ]; then
+            echo "No changes found for dev-sockets"
+            echo "::set-output name=changes_dev::false"
+          else
+            echo "Changes found for dev-sockets"
+            echo "::set-output name=changes_dev::true"
+          fi
+
+      - name: Sync dev-sockets branch if differences found
+        if: steps.check_diff_dev.outputs.changes_dev == 'true' 
+        run: |
+          git merge upstream/dev-sockets || git merge --abort
+          git push origin dev-sockets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
