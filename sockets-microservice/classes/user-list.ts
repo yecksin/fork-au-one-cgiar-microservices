@@ -40,7 +40,8 @@ export class UserList {
   }
 
   public getListByPlatform(platform: string) {
-    return this.userList.filter(user => user.name !== 'nameless' && user.platform === platform);
+    // return this.userList.filter(user => user.name !== 'nameless' && user.platform === platform);
+    return this.userList.filter(user => user.platform === platform);
   }
 
   public getAllUsers() {
